@@ -83,7 +83,15 @@ if selected_page == "Inteligência Operacional com Pipefy":
 
 base_df = load_dataset()
 if base_df.empty:
-    st.error("Dados processados não encontrados. Execute `python main.py` antes de abrir o dashboard.")
+    st.warning(
+        "Base operacional legada não encontrada neste ambiente. "
+        "Abrindo automaticamente a seção de Inteligência Operacional com Pipefy."
+    )
+    render_pipefy_workflow_intelligence()
+    st.markdown("---")
+    if not presentation_mode:
+        render_capabilities(PRODUCT_CAPABILITIES)
+        st.caption(f"Contato: {CONTACT_EMAIL} | LinkedIn: {CONTACT_LINKEDIN}")
     st.stop()
 
 alerts_df = build_alerts(base_df)
