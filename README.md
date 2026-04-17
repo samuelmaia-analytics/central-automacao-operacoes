@@ -1,9 +1,10 @@
 # Central de Automação e Operações
 
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
-[![Streamlit](https://img.shields.io/badge/Streamlit-Command%20Center-FF4B4B?logo=streamlit&logoColor=white)](https://streamlit.io/)
+[![Streamlit](https://img.shields.io/badge/Streamlit-Central%20de%20Automacao%20e%20Operacoes-FF4B4B?logo=streamlit&logoColor=white)](https://streamlit.io/)
+[![Pipefy](https://img.shields.io/badge/Pipefy-Integrado-4F46E5)](https://www.pipefy.com/)
 [![DuckDB](https://img.shields.io/badge/DuckDB-Analytics-FECD45)](https://duckdb.org/)
-[![CI](https://img.shields.io/badge/CI-Ruff%20%2B%20Pytest-0EA5E9)](.github/workflows/ci.yml)
+[![CI](https://github.com/samuelmaia-analytics/central-automacao-operacoes/actions/workflows/ci.yml/badge.svg)](https://github.com/samuelmaia-analytics/central-automacao-operacoes/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/License-Proprietary-red)](LICENSE)
 
 A Central de Automação e Operações é um produto analítico desenvolvido em Python, SQL e Streamlit para monitorar workflows operacionais, acompanhar SLA, identificar gargalos, priorizar demandas e gerar alertas automatizados a partir de dados operacionais e integração com Pipefy.
