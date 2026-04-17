@@ -11,27 +11,28 @@ def _apply_executive_layout(fig: go.Figure) -> go.Figure:
     fig.update_layout(
         template="plotly_white",
         paper_bgcolor="#ffffff",
-        plot_bgcolor="#ffffff",
-        font={"color": "#111827", "size": 14},
-        title={"font": {"color": "#111827", "size": 30}},
-        legend={"font": {"color": "#111827", "size": 14}},
+        plot_bgcolor="rgba(0,0,0,0)",
+        font={"color": "#0f172a", "size": 12},
+        title={"font": {"color": "#0b355a", "size": 16}, "x": 0.01, "xanchor": "left"},
+        legend={"font": {"color": "#334155", "size": 11}, "orientation": "v", "y": 1.0, "x": 1.02},
         legend_title_text="",
-        margin={"l": 20, "r": 20, "t": 60, "b": 20},
-        hoverlabel={"bgcolor": "#ffffff", "font": {"color": "#111827"}},
+        margin={"l": 18, "r": 24, "t": 62, "b": 20},
+        hoverlabel={"bgcolor": "#ffffff", "font": {"color": "#0f172a"}},
+        height=360,
     )
     fig.update_xaxes(
         showgrid=True,
-        gridcolor="#d1d5db",
+        gridcolor="#e2e8f0",
         zeroline=False,
-        title_font={"color": "#111827", "size": 18},
-        tickfont={"color": "#374151", "size": 14},
+        title_font={"color": "#334155", "size": 12},
+        tickfont={"color": "#475569", "size": 11},
     )
     fig.update_yaxes(
         showgrid=True,
-        gridcolor="#d1d5db",
+        gridcolor="#e2e8f0",
         zeroline=False,
-        title_font={"color": "#111827", "size": 18},
-        tickfont={"color": "#374151", "size": 14},
+        title_font={"color": "#334155", "size": 12},
+        tickfont={"color": "#475569", "size": 11},
     )
     return fig
 
@@ -186,4 +187,77 @@ def backlog_risk_distribution(df: pd.DataFrame) -> go.Figure:
         color_discrete_map={"Baixo": "#0f766e", "Medio": "#f59e0b", "Alto": "#ef4444"},
     )
     fig.update_layout(xaxis_title="Risco", yaxis_title="Volume", showlegend=False)
+    return _apply_executive_layout(fig)
+
+
+def pipefy_cards_by_phase(df: pd.DataFrame) -> go.Figure:
+    title = "Cards por fase"
+    if df.empty or "current_phase" not in df.columns:
+        return _empty_figure(title)
+    data = df["current_phase"].fillna("Sem fase").value_counts().rename_axis("fase").reset_index(name="volume")
+    fig = px.bar(data, x="fase", y="volume", title=title, color_discrete_sequence=[COLORWAY[0]])
+    fig.update_layout(xaxis_title="Fase", yaxis_title="Cards")
+    return _apply_executive_layout(fig)
+
+
+def pipefy_cards_by_priority(df: pd.DataFrame) -> go.Figure:
+    title = "Cards por prioridade"
+    if df.empty or "priority" not in df.columns:
+        return _empty_figure(title)
+    order = ["Baixa", "Média", "Alta", "Crítica"]
+    data = (
+        df["priority"]
+        .fillna("Não definida")
+        .value_counts()
+        .rename_axis("prioridade")
+        .reset_index(name="volume")
+    )
+    fig = px.bar(
+        data,
+        x="prioridade",
+        y="volume",
+        title=title,
+        category_orders={"prioridade": order},
+        color="prioridade",
+        color_discrete_map={"Baixa": "#0ea5e9", "Média": "#6366f1", "Alta": "#f59e0b", "Crítica": "#ef4444"},
+    )
+    fig.update_layout(xaxis_title="Prioridade", yaxis_title="Cards", showlegend=False)
+    return _apply_executive_layout(fig)
+
+
+def pipefy_sla_by_phase(df: pd.DataFrame) -> go.Figure:
+    title = "SLA por fase"
+    if df.empty or "current_phase" not in df.columns or "sla_status" not in df.columns:
+        return _empty_figure(title)
+    data = (
+        df.groupby(["current_phase", "sla_status"], as_index=False)["ticket_id"]
+        .count()
+        .rename(columns={"ticket_id": "volume"})
+    )
+    fig = px.bar(
+        data,
+        x="current_phase",
+        y="volume",
+        color="sla_status",
+        title=title,
+        barmode="group",
+        color_discrete_map={
+            "Dentro do SLA": "#16a34a",
+            "SLA em risco": "#f59e0b",
+            "SLA vencido": "#ef4444",
+        },
+    )
+    fig.update_layout(xaxis_title="Fase", yaxis_title="Cards")
+    return _apply_executive_layout(fig)
+
+
+def pipefy_phase_priority_heatmap(df: pd.DataFrame) -> go.Figure:
+    title = "Heatmap fase x prioridade"
+    if df.empty or "current_phase" not in df.columns or "priority" not in df.columns:
+        return _empty_figure(title)
+    matrix = pd.crosstab(df["current_phase"].fillna("Sem fase"), df["priority"].fillna("Não definida"))
+    if matrix.empty:
+        return _empty_figure(title)
+    fig = px.imshow(matrix, text_auto=True, aspect="auto", title=title, color_continuous_scale="Blues")
+    fig.update_layout(xaxis_title="Prioridade", yaxis_title="Fase")
     return _apply_executive_layout(fig)

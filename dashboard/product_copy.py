@@ -65,4 +65,5 @@ PRODUCT_CAPABILITIES = [
     "Inteligência de backlog",
     "Recomendações executivas",
     "Integração com Pipefy",
+    "Exportação de alertas",
 ]

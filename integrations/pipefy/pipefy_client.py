@@ -36,7 +36,7 @@ class PipefyClient:
         self,
         token: str | None = None,
         endpoint: str = PIPEFY_GRAPHQL_ENDPOINT,
-        timeout_seconds: int = 20,
+        timeout_seconds: int = 8,
         use_mock: bool = False,
         sample_file: Path = SAMPLE_FILE,
     ) -> None:
@@ -89,4 +89,3 @@ class PipefyClient:
             raise FileNotFoundError(f"Arquivo mock nao encontrado: {self.sample_file}")
         with self.sample_file.open("r", encoding="utf-8") as fp:
             return json.load(fp)
-

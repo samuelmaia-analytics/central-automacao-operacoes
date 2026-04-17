@@ -2,17 +2,49 @@ from __future__ import annotations
 
 import os
 import sys
+from datetime import datetime
 from pathlib import Path
 
 import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-# Ensure project root is importable when this page is executed directly by Streamlit.
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PAGES_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
-
+if str(PAGES_ROOT) not in sys.path:
+    sys.path.insert(0, str(PAGES_ROOT))
+try:
+    from dashboard.charts import (
+        pipefy_cards_by_phase,
+        pipefy_cards_by_priority,
+        pipefy_phase_priority_heatmap,
+        pipefy_sla_by_phase,
+    )
+    from dashboard.components import (
+        render_data_source_status,
+        render_kpi_cards,
+        render_no_data,
+        render_section_header,
+        render_story_section,
+    )
+    from dashboard.insights import executive_story_lines
+except Exception:
+    from charts import (
+        pipefy_cards_by_phase,
+        pipefy_cards_by_priority,
+        pipefy_phase_priority_heatmap,
+        pipefy_sla_by_phase,
+    )
+    from components import (
+        render_data_source_status,
+        render_kpi_cards,
+        render_no_data,
+        render_section_header,
+        render_story_section,
+    )
+    from insights import executive_story_lines
 from integrations.pipefy.pipefy_pipeline import run_pipefy_pipeline
 
 REQUIRED_ALERT_COLUMNS = [
@@ -34,41 +66,31 @@ def _is_true(value: str | None) -> bool:
 
 
 @st.cache_data(show_spinner=False)
-def _load_pipefy_data(force_mock: bool) -> pd.DataFrame:
-    return run_pipefy_pipeline(use_mock=force_mock)
+def _load_pipefy_data(force_mock: bool, pipe_id: str | None = None) -> pd.DataFrame:
+    return run_pipefy_pipeline(pipe_id=pipe_id, use_mock=force_mock)
 
 
 def _safe_pct(numerator: int, denominator: int) -> float:
-    return (numerator / denominator * 100) if denominator else 0.0
+    return (numerator / denominator * 100.0) if denominator else 0.0
 
 
-def render_pipefy_workflow_intelligence() -> None:
-    st.markdown("## Central de Automação e Operações")
-    st.caption(
-        "Monitoramento operacional integrado ao Pipefy para acompanhar cards, fases, SLA, backlog, riscos e alertas automatizados."
-    )
-    st.markdown("### Inteligência Operacional com Pipefy")
-
-    default_mock = _is_true(os.getenv("USE_PIPEFY_MOCK", "true")) or not os.getenv("PIPEFY_TOKEN")
-    force_mock = st.sidebar.toggle("Pipefy em modo mock", value=default_mock, key="pipefy_force_mock")
-    if st.sidebar.button("Atualizar dados Pipefy", key="refresh_pipefy"):
-        _load_pipefy_data.clear()
-    df = _load_pipefy_data(force_mock=force_mock)
-
-    if df.empty:
-        st.info("Sem dados Pipefy disponíveis.")
-        return
-
-    for col in ["created_at", "updated_at", "due_date", "closed_at"]:
-        if col in df.columns:
-            df[col] = pd.to_datetime(df[col], errors="coerce")
-
-    phase_filter = st.multiselect("Fase", sorted(df["current_phase"].dropna().astype(str).unique()))
-    priority_filter = st.multiselect("Prioridade", sorted(df["priority"].dropna().astype(str).unique()))
-    category_filter = st.multiselect("Categoria", sorted(df["category"].dropna().astype(str).unique()))
-    assignee_filter = st.multiselect("Responsável", sorted(df["assignee"].dropna().astype(str).unique()))
-    sla_filter = st.multiselect("SLA", sorted(df["sla_status"].dropna().astype(str).unique()))
-    risk_filter = st.multiselect("Risco", sorted(df["risk_level"].dropna().astype(str).unique()))
+def _render_pipefy_filters(df: pd.DataFrame) -> pd.DataFrame:
+    f1, f2, f3, f4 = st.columns(4)
+    with f1:
+        phase_filter = st.multiselect("Fase", sorted(df["current_phase"].dropna().astype(str).unique()))
+    with f2:
+        priority_filter = st.multiselect("Prioridade", sorted(df["priority"].dropna().astype(str).unique()))
+    with f3:
+        category_filter = st.multiselect("Categoria", sorted(df["category"].dropna().astype(str).unique()))
+    with f4:
+        assignee_filter = st.multiselect("Responsável", sorted(df["assignee"].dropna().astype(str).unique()))
+    f5, f6, f7 = st.columns(3)
+    with f5:
+        sla_filter = st.multiselect("SLA", sorted(df["sla_status"].dropna().astype(str).unique()))
+    with f6:
+        risk_filter = st.multiselect("Risco", sorted(df["risk_level"].dropna().astype(str).unique()))
+    with f7:
+        status_filter = st.multiselect("Status", sorted(df["status"].dropna().astype(str).unique()))
 
     filtered = df.copy()
     if phase_filter:
@@ -83,9 +105,49 @@ def render_pipefy_workflow_intelligence() -> None:
         filtered = filtered[filtered["sla_status"].isin(sla_filter)]
     if risk_filter:
         filtered = filtered[filtered["risk_level"].isin(risk_filter)]
+    if status_filter:
+        filtered = filtered[filtered["status"].isin(status_filter)]
+    return filtered
 
+
+def render_pipefy_workflow_intelligence() -> None:
+    st.markdown("## Central de Automação e Operações")
+    st.caption(
+        "Monitoramento operacional integrado ao Pipefy para acompanhar cards, fases, SLA, backlog, riscos e alertas automatizados."
+    )
+    render_section_header("Inteligência Operacional com Pipefy")
+
+    token_exists = bool(os.getenv("PIPEFY_TOKEN", "").strip())
+    default_mock = _is_true(os.getenv("USE_PIPEFY_MOCK", "true")) or not token_exists
+    force_mock = st.sidebar.toggle("Pipefy em modo demonstração", value=default_mock, key="pipefy_force_mock")
+    pipe_id = os.getenv("PIPEFY_PIPE_ID", "").strip() or None
+    if st.sidebar.button("Atualizar dados Pipefy", key="refresh_pipefy"):
+        _load_pipefy_data.clear()
+    df = _load_pipefy_data(force_mock=force_mock, pipe_id=pipe_id)
+
+    source = "Modo demonstração" if force_mock else "Pipefy API"
+    status = "Dados simulados para portfólio" if force_mock else "Conectado"
+    render_data_source_status(
+        source=source,
+        status=status,
+        details=[
+            f"Última atualização: {datetime.now().strftime('%d/%m/%Y %H:%M')}",
+            f"Cards carregados: {len(df)}",
+            f"Pipe analisado: {pipe_id or 'Não informado'}",
+        ],
+    )
+
+    if df.empty:
+        render_no_data("Sem dados Pipefy disponíveis no momento. Ative modo demonstração ou valide PIPEFY_TOKEN/PIPEFY_PIPE_ID.")
+        return
+
+    for col in ["created_at", "updated_at", "due_date", "closed_at"]:
+        if col in df.columns:
+            df[col] = pd.to_datetime(df[col], errors="coerce")
+
+    filtered = _render_pipefy_filters(df)
     if filtered.empty:
-        st.warning("Os filtros retornaram zero cards.")
+        render_no_data("Nenhum card corresponde aos filtros selecionados.")
         return
 
     open_mask = filtered["status"].eq("open")
@@ -97,124 +159,145 @@ def render_pipefy_workflow_intelligence() -> None:
     in_sla = int(filtered["sla_status"].eq("Dentro do SLA").sum())
     sla_pct = _safe_pct(in_sla, len(filtered))
 
-    c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Total de cards", f"{len(filtered)}")
-    c2.metric("Cards abertos", f"{int(open_mask.sum())}")
-    c3.metric("Cards vencidos", f"{int(overdue_mask.sum())}")
-    c4.metric("Cards em risco de SLA", f"{int(risk_mask.sum())}")
+    cards = [
+        {
+            "title": "Total de cards",
+            "value": f"{len(filtered)}",
+            "description": "Volume monitorado no workflow Pipefy.",
+            "status": "neutro",
+            "icon": "📌",
+        },
+        {
+            "title": "Cards abertos",
+            "value": f"{int(open_mask.sum())}",
+            "description": "Cards em progresso no fluxo.",
+            "status": "atencao" if open_mask.sum() else "saudavel",
+            "icon": "📂",
+        },
+        {
+            "title": "Cards vencidos",
+            "value": f"{int(overdue_mask.sum())}",
+            "description": "Cards com SLA vencido.",
+            "status": "critico" if overdue_mask.sum() else "saudavel",
+            "icon": "⚠️",
+        },
+        {
+            "title": "Cards em risco SLA",
+            "value": f"{int(risk_mask.sum())}",
+            "description": "Cards próximos do vencimento de prazo.",
+            "status": "atencao" if risk_mask.sum() else "saudavel",
+            "icon": "⏱️",
+        },
+        {
+            "title": "Cards sem responsável",
+            "value": f"{int(unassigned_mask.sum())}",
+            "description": "Demandas sem owner definido.",
+            "status": "atencao" if unassigned_mask.sum() else "saudavel",
+            "icon": "👥",
+        },
+        {
+            "title": "Cards críticos",
+            "value": f"{int(critical_mask.sum())}",
+            "description": "Demandas com prioridade crítica.",
+            "status": "critico" if critical_mask.sum() else "neutro",
+            "icon": "🚨",
+        },
+        {
+            "title": "Tempo médio em aberto",
+            "value": f"{avg_days:.1f} dias",
+            "description": "Idade média das demandas ativas.",
+            "status": "neutro",
+            "icon": "🕒",
+        },
+        {
+            "title": "Percentual dentro do SLA",
+            "value": f"{sla_pct:.1f}%",
+            "description": "Conformidade do fluxo com prazo operacional.",
+            "status": "saudavel" if sla_pct >= 85 else "atencao",
+            "icon": "✅",
+        },
+    ]
+    render_kpi_cards(cards, cols=4)
 
-    c5, c6, c7, c8 = st.columns(4)
-    c5.metric("Cards sem responsável", f"{int(unassigned_mask.sum())}")
-    c6.metric("Cards críticos", f"{int(critical_mask.sum())}")
-    c7.metric("Tempo médio em aberto", f"{avg_days:.1f} dias")
-    c8.metric("% dentro do SLA", f"{sla_pct:.1f}%")
+    c1, c2 = st.columns(2)
+    with c1:
+        st.caption("Este gráfico mostra onde o backlog está mais concentrado no workflow.")
+        st.plotly_chart(pipefy_cards_by_phase(filtered), width="stretch")
+    with c2:
+        st.caption("Este gráfico mostra a distribuição de prioridade para orientar triagem.")
+        st.plotly_chart(pipefy_cards_by_priority(filtered), width="stretch")
 
-    g1, g2 = st.columns(2)
-    g1.plotly_chart(
-        px.bar(
-            filtered["current_phase"].value_counts().rename_axis("fase").reset_index(name="volume"),
-            x="fase",
-            y="volume",
-            title="Cards por fase",
-        ),
-        width="stretch",
-    )
-    g2.plotly_chart(
-        px.bar(
-            filtered["priority"].value_counts().rename_axis("priority").reset_index(name="volume"),
-            x="priority",
-            y="volume",
-            title="Cards por prioridade",
-        ),
-        width="stretch",
-    )
-
-    g3, g4 = st.columns(2)
-    g3.plotly_chart(
-        px.bar(
-            filtered["category"].value_counts().rename_axis("category").reset_index(name="volume"),
-            x="category",
+    c3, c4 = st.columns(2)
+    with c3:
+        st.caption("Este gráfico mostra quais categorias concentram maior volume operacional.")
+        category_chart = px.bar(
+            filtered["category"].value_counts().rename_axis("categoria").reset_index(name="volume"),
+            x="categoria",
             y="volume",
             title="Cards por categoria",
-        ),
-        width="stretch",
-    )
-    sla_by_phase = (
-        filtered.groupby(["current_phase", "sla_status"], as_index=False)["ticket_id"]
-        .count()
-        .rename(columns={"ticket_id": "volume"})
-    )
-    g4.plotly_chart(
-        px.bar(
-            sla_by_phase,
-            x="current_phase",
-            y="volume",
-            color="sla_status",
-            barmode="group",
-            title="SLA por fase",
-        ),
-        width="stretch",
-    )
+            color_discrete_sequence=["#6366f1"],
+        )
+        category_chart.update_layout(template="plotly_white", height=360, margin={"l": 16, "r": 10, "t": 54, "b": 16})
+        st.plotly_chart(category_chart, width="stretch")
+    with c4:
+        st.caption("Este gráfico mostra o desempenho de SLA em cada fase do processo.")
+        st.plotly_chart(pipefy_sla_by_phase(filtered), width="stretch")
 
-    g5, g6 = st.columns(2)
-    g5.plotly_chart(
-        px.bar(
-            filtered["assignee"].value_counts().rename_axis("assignee").reset_index(name="volume"),
-            x="assignee",
+    c5, c6 = st.columns(2)
+    with c5:
+        st.caption("Este gráfico mostra a concentração de backlog por responsável.")
+        assignee_chart = px.bar(
+            filtered["assignee"].value_counts().rename_axis("responsavel").reset_index(name="volume"),
+            x="responsavel",
             y="volume",
             title="Backlog por responsável",
-        ),
-        width="stretch",
-    )
-    temporal = (
-        filtered.dropna(subset=["created_at"])
-        .assign(data=lambda d: d["created_at"].dt.date)
-        .groupby("data", as_index=False)["ticket_id"]
-        .count()
-        .rename(columns={"ticket_id": "volume"})
-    )
-    g6.plotly_chart(
-        px.line(temporal, x="data", y="volume", markers=True, title="Evolução temporal dos cards"),
-        width="stretch",
-    )
+            color_discrete_sequence=["#0ea5e9"],
+        )
+        assignee_chart.update_layout(template="plotly_white", height=360, margin={"l": 16, "r": 10, "t": 54, "b": 16})
+        st.plotly_chart(assignee_chart, width="stretch")
+    with c6:
+        st.caption("Este gráfico mostra a evolução temporal de cards criados.")
+        temporal = (
+            filtered.dropna(subset=["created_at"])
+            .assign(data=lambda d: d["created_at"].dt.date)
+            .groupby("data", as_index=False)["ticket_id"]
+            .count()
+            .rename(columns={"ticket_id": "volume"})
+        )
+        temporal_chart = px.line(
+            temporal,
+            x="data",
+            y="volume",
+            title="Evolução temporal dos cards",
+            markers=True,
+            color_discrete_sequence=["#0f766e"],
+        )
+        temporal_chart.update_layout(template="plotly_white", height=360, margin={"l": 16, "r": 10, "t": 54, "b": 16})
+        st.plotly_chart(temporal_chart, width="stretch")
 
-    heatmap_data = (
-        filtered.groupby(["current_phase", "priority"], as_index=False)["ticket_id"]
-        .count()
-        .rename(columns={"ticket_id": "volume"})
-    )
-    st.plotly_chart(
-        px.density_heatmap(
-            heatmap_data,
-            x="current_phase",
-            y="priority",
-            z="volume",
-            histfunc="sum",
-            title="Heatmap fase x prioridade",
-        ),
-        width="stretch",
-    )
+    st.caption("Este heatmap mostra a concentração de volume entre fase e prioridade.")
+    st.plotly_chart(pipefy_phase_priority_heatmap(filtered), width="stretch")
 
-    st.markdown("### Alertas operacionais")
+    render_section_header("Alertas Automatizados", "Fila operacional de cards com risco e ação recomendada.")
     present_cols = [col for col in REQUIRED_ALERT_COLUMNS if col in filtered.columns]
     alerts = filtered[present_cols].copy()
+    alert_summary_cols = st.columns(4)
+    alert_summary_cols[0].metric("Total de alertas", len(alerts))
+    alert_summary_cols[1].metric("Alertas críticos", int(alerts["risk_level"].astype(str).str.contains("High|Crítico", case=False, na=False).sum()))
+    alert_summary_cols[2].metric("Alertas SLA", int(alerts["sla_status"].astype(str).str.contains("SLA", case=False, na=False).sum()))
+    alert_summary_cols[3].metric("Sem responsável", int(unassigned_mask.sum()))
+
     st.dataframe(alerts, width="stretch")
     st.download_button(
-        "Exportar alertas em CSV",
+        "Exportar alertas CSV",
         data=alerts.to_csv(index=False).encode("utf-8"),
         file_name="pipefy_alerts.csv",
         mime="text/csv",
     )
 
-    phase_peak = filtered["current_phase"].value_counts().idxmax()
-    highest_risk = filtered["risk_level"].value_counts().idxmax()
-    top_action = filtered["recommended_action"].value_counts().idxmax()
-    st.markdown("### Insights executivos")
-    st.write(f"- A fase com maior concentração de cards é **{phase_peak}**.")
-    st.write(f"- O maior risco operacional atual está em **{highest_risk}**.")
-    st.write(f"- Existem **{int(unassigned_mask.sum())}** cards sem responsável.")
-    st.write(f"- Existem **{int(overdue_mask.sum())}** cards com SLA vencido.")
-    st.write(f"- A principal recomendação é **{top_action}**.")
+    stories = executive_story_lines(filtered)
+    render_story_section("Insights Executivos", stories["insights"])
+    render_story_section("Ações Recomendadas", stories["acoes"])
 
 
 if __name__ == "__main__":

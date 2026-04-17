@@ -35,15 +35,15 @@ Raw CSV
      -> Relatório Executivo
 ```
 
-## Dashboard (produto analítico)
+## Dashboard como Produto Analítico
 Nome do produto no app:
 - **Central de Automação e Operações**
 
 Seções disponíveis:
-- Overview Executivo
+- Visão Executiva
 - Monitoramento de SLA
 - Backlog & Prioridades
-- Gargalos do Workflow
+- Gargalos Operacionais
 - Alertas Automatizados
 - Insights Executivos
 - Inteligência Operacional com Pipefy
@@ -53,9 +53,20 @@ Recursos de experiência:
 - filtros globais consistentes;
 - botão **Limpar filtros**;
 - modo apresentação para prints de portfólio;
-- cards executivos, badges e narrativa automática;
+- cards executivos com contexto de negócio;
+- índice de saúde operacional (0-100) com recomendação principal;
+- storytelling automático: resumo, riscos, oportunidades e ações;
 - exportação CSV de alertas e dados filtrados;
-- rodapé discreto com contato.
+- status de fonte de dados (Pipefy API ou modo demonstração);
+- rodapé discreto com stack do produto.
+
+Principais KPIs:
+- total de cards/processos;
+- percentual dentro do SLA;
+- backlog aberto e cards vencidos;
+- demandas críticas e cards sem responsável;
+- tempo médio de resolução;
+- potencial de horas economizadas.
 
 ## Camada de Integração Pipefy
 O Pipefy foi integrado como **camada operacional** onde os processos acontecem (workflow, fases, backlog, responsáveis e prazos), enquanto Python/SQL/Streamlit permanecem como **camada de inteligência analítica** para SLA, risco, alertas e recomendações.
@@ -155,6 +166,39 @@ python main.py
 streamlit run dashboard/app.py
 python -m integrations.pipefy.pipefy_pipeline
 ```
+
+## Publicação no Streamlit Cloud
+1. Suba o repositório no GitHub com `requirements.txt` atualizado.
+2. No Streamlit Cloud, crie o app apontando para `dashboard/app.py`.
+3. Configure em `Secrets`:
+   - `PIPEFY_TOKEN`
+   - `PIPEFY_PIPE_ID`
+   - `USE_PIPEFY_MOCK`
+   - `APP_DATA_MODE=pipefy` (recomendado para portfolio)
+4. Faça deploy e valide a página **Inteligência Operacional com Pipefy**.
+
+### Configuração recomendada para estabilidade
+Use estes valores em **Secrets** no Streamlit Cloud:
+- `APP_DATA_MODE=pipefy`
+- `USE_PIPEFY_MOCK=true`
+- `PIPEFY_PIPE_ID=<id_do_pipe>`
+- `PIPEFY_TOKEN=<token_opcional>`
+
+Com isso, o app sobe rápido mesmo sem API real e continua pronto para alternar para dados reais.
+
+### Troubleshooting (Cloud)
+- **Erro de import `dashboard`**: já tratado com fallback de import local no app.
+- **Botão “Limpar filtros” não limpa**: implementado reset robusto por versão de chave dos widgets.
+- **Filtros ilegíveis**: contraste reforçado na sidebar (campos, toggle e botões).
+- **Lentidão de carregamento**: timeout da API Pipefy reduzido e filtros sem seleção padrão no primeiro load.
+
+## Prints recomendados para portfólio
+- Tela inicial com KPIs e header do produto.
+- Bloco do **Índice de Saúde Operacional**.
+- Página **Inteligência Operacional com Pipefy** com status de fonte de dados.
+- Seção **Alertas Automatizados** com exportação CSV.
+- Seção **Insights Executivos**.
+- **Explorador Operacional de Cards** com filtros aplicados.
 
 Incremental por watermark:
 ```bash
