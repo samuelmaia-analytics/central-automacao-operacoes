@@ -75,16 +75,8 @@ def render_pipefy_workflow_intelligence() -> None:
     force_mock = st.sidebar.toggle("Pipefy em modo mock", value=default_mock, key="pipefy_force_mock")
     if st.sidebar.button("Atualizar dados Pipefy", key="refresh_pipefy"):
         _load_pipefy_data.clear()
-    try:
-        df = _load_pipefy_data(force_mock=force_mock)
-    except Exception:
-        st.warning("Falha ao carregar dados da API Pipefy. Alternando automaticamente para modo demonstração.")
-        try:
-            df = run_pipefy_pipeline(use_mock=True)
-            force_mock = True
-        except Exception:
-            render_no_data("Não foi possível carregar dados Pipefy neste momento.")
-            return
+
+    df = _load_pipefy_data(force_mock=force_mock)
     source = "Modo demonstração" if force_mock else "Pipefy API"
     status = "Dados simulados para portfólio" if force_mock else "Conectado"
     pipe_id = os.getenv("PIPEFY_PIPE_ID", "Não informado")
