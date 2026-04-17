@@ -23,7 +23,6 @@ from dashboard.charts import (
 )
 from dashboard.components import (
     render_badge,
-    render_bullet_summary,
     render_capabilities,
     render_health_score_card,
     render_kpi_grid,
