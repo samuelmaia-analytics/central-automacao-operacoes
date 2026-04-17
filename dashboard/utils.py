@@ -8,16 +8,18 @@ import pandas as pd
 import streamlit as st
 
 from src.analytics.kpis import compute_kpis
-from src.config.settings import DATA_QUALITY_OUTPUT_FILE, PROCESSED_DATASET_CSV, SQL_DIR
+from src.config.settings import DATA_QUALITY_OUTPUT_FILE, PROCESSED_DATASET_CSV, PROJECT_ROOT, SQL_DIR
 
 OPEN_STATUSES = {"open", "pending customer response"}
+PORTFOLIO_DATASET_CSV = PROJECT_ROOT / "data" / "samples" / "tickets_enriched_portfolio.csv"
 
 
 @st.cache_data(show_spinner=False)
 def load_dataset(path: Path = PROCESSED_DATASET_CSV) -> pd.DataFrame:
-    if not path.exists():
+    dataset_path = path if path.exists() else PORTFOLIO_DATASET_CSV
+    if not dataset_path.exists():
         return pd.DataFrame()
-    df = pd.read_csv(path)
+    df = pd.read_csv(dataset_path)
     for col in ["first_response_time", "time_to_resolution", "date_of_purchase"]:
         if col in df.columns:
             df[col] = pd.to_datetime(df[col], errors="coerce")

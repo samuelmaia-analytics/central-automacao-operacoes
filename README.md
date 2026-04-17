@@ -40,6 +40,8 @@ USE_PIPEFY_MOCK=true
 APP_DATA_MODE=pipefy
 ```
 
+Observação: quando `tickets_enriched.csv` não está disponível (ex.: Streamlit Cloud), o app usa automaticamente `data/samples/tickets_enriched_portfolio.csv` como base legada de demonstração.
+
 ## Deploy no Streamlit Cloud
 Entrada do app: `dashboard/app.py`
 
