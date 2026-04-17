@@ -40,12 +40,12 @@ def render_kpi_card(
     delta: str | None = None,
     icon: str | None = None,
 ) -> str:
-    _ = icon  # intentionally ignored for a cleaner executive visual
+    icon_txt = icon or ""
     delta_html = f"<span class='metric-delta'>{delta}</span>" if delta else ""
     return (
         f"<div class='metric-card status-{status}'>"
         "<div class='metric-top'>"
-        f"<div class='metric-label'>{title}</div>"
+        f"<div class='metric-label'>{icon_txt} {title}</div>"
         f"{delta_html}"
         "</div>"
         f"<div class='metric-value'>{value}</div>"

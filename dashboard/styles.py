@@ -8,44 +8,44 @@ def inject_global_styles() -> None:
         """
         <style>
             .stApp {
-                background: #f7f9fc;
+                background: #f3f6fb;
                 color: #0f172a;
             }
             [data-testid="stSidebar"] {
-                background: #ffffff;
-                border-right: 1px solid #e2e8f0;
+                background: #0f172a;
+                border-right: 1px solid #1e293b;
             }
             [data-testid="stSidebar"] * {
-                color: #0f172a !important;
+                color: #dbe7ff !important;
             }
             [data-testid="stSidebar"] .stRadio label {
-                color: #0f172a !important;
+                color: #dbe7ff !important;
             }
             [data-testid="stSidebar"] .stCaption {
-                color: #64748b !important;
+                color: #93c5fd !important;
             }
             .product-header {
-                background: #ffffff;
-                border: 1px solid #dbe5f1;
+                background: linear-gradient(135deg, #0b1d3a 0%, #123b67 100%);
+                border: 1px solid #1e3a5f;
                 border-radius: 8px;
                 padding: 20px 22px;
                 margin-bottom: 14px;
-                box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+                box-shadow: 0 8px 24px rgba(2, 6, 23, 0.12);
             }
             .main-title {
-                color: #0f172a;
+                color: #f8fafc;
                 font-size: 2.0rem;
                 font-weight: 700;
                 line-height: 1.15;
                 margin-bottom: 0.35rem;
             }
             .sub-title {
-                color: #334155;
+                color: #dbeafe;
                 font-size: 1rem;
                 margin-bottom: 0.75rem;
             }
             .intro-copy {
-                color: #475569;
+                color: #cfe3ff;
                 font-size: 0.95rem;
                 margin-bottom: 0.85rem;
                 max-width: 980px;
@@ -119,13 +119,13 @@ def inject_global_styles() -> None:
             .badge-info {background:#eff6ff;border-color:#bfdbfe;color:#1e3a8a;}
             .chip {
                 display: inline-block;
-                background: #eef2ff;
-                border: 1px solid #c7d2fe;
+                background: #102c4f;
+                border: 1px solid #234a77;
                 border-radius: 8px;
                 padding: 0.3rem 0.55rem;
                 margin: 0.12rem;
                 font-size: 0.82rem;
-                color: #3730a3;
+                color: #dbeafe;
             }
             .insight-card {
                 background: #ffffff;
@@ -229,17 +229,17 @@ def inject_global_styles() -> None:
             }
             .stDownloadButton > button,
             .stButton > button {
-                background: #0f172a !important;
+                background: #1d4ed8 !important;
                 color: #ffffff !important;
-                border: 1px solid #0f172a !important;
+                border: 1px solid #1d4ed8 !important;
                 border-radius: 6px !important;
                 font-weight: 600 !important;
             }
             .stDownloadButton > button:hover,
             .stButton > button:hover {
-                background: #1e293b !important;
+                background: #1e40af !important;
                 color: #ffffff !important;
-                border-color: #1e293b !important;
+                border-color: #1e40af !important;
             }
         </style>
         """,
