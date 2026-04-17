@@ -1,4 +1,4 @@
-# LGPD & Privacy
+# LGPD e Privacidade
 
 ## Objetivo
 Documentar diretrizes de privacidade e aderência referencial à LGPD no contexto deste projeto analítico.

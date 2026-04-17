@@ -24,15 +24,14 @@ O projeto entrega uma esteira ponta a ponta:
 - Arquivo local: `data/raw/customer_support_tickets.csv`
 
 ## Arquitetura da solução
-```mermaid
-flowchart LR
-    A[Raw CSV] --> B[Ingestão e Validação]
-    B --> C[Transformação e Regras de Negócio]
-    C --> D[KPIs, Insights e Alertas]
-    D --> E[DuckDB + SQL]
-    D --> F[Snapshots Versionados]
-    E --> G[Dashboard Streamlit]
-    D --> H[Relatório Executivo]
+```text
+Raw CSV
+  -> Ingestão e Validação
+  -> Transformação e Regras de Negócio
+  -> KPIs, Insights e Alertas
+     -> DuckDB + SQL -> Dashboard Streamlit
+     -> Snapshots Versionados
+     -> Relatório Executivo
 ```
 
 ## Dashboard (produto analítico)

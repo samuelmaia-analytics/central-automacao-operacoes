@@ -1,4 +1,4 @@
-# Data Governance
+# Governança de Dados
 
 ## Objetivo
 Estabelecer diretrizes para qualidade, rastreabilidade, segurança e uso responsável dos dados operacionais.

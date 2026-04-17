@@ -32,14 +32,13 @@ Descrever a arquitetura técnica da solução de dados e automação operacional
 - Versionamento por `run_id`, `snapshot_date` e `source_hash`.
 
 ## Fluxo arquitetural
-```mermaid
-flowchart LR
-    A[Dataset Raw] --> B[Ingestão]
-    B --> C[Transformação]
-    C --> D[Regras de Automação]
-    D --> E[Camada Analítica]
-    E --> F[DuckDB + SQL]
-    E --> G[Relatório Executivo]
-    F --> H[Dashboard Streamlit]
-    E --> I[Qualidade e Governança]
+```text
+Dataset Raw
+  -> Ingestão
+  -> Transformação
+  -> Regras de Automação
+  -> Camada Analítica
+     -> DuckDB + SQL -> Dashboard Streamlit
+     -> Relatório Executivo
+     -> Qualidade e Governança
 ```
