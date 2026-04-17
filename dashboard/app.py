@@ -55,12 +55,13 @@ APP_TITLE = "Central de Automação e Operações"
 APP_SUBTITLE = "Produto analítico para monitoramento de workflows, SLA, backlog, gargalos operacionais e alertas automatizados."
 CONTACT_EMAIL = os.getenv("PROJECT_CONTACT_EMAIL", "smaia2@gmail.com")
 CONTACT_LINKEDIN = os.getenv("PROJECT_CONTACT_LINKEDIN", "https://linkedin.com/in/samuelmaia-analytics")
+APP_DATA_MODE = os.getenv("APP_DATA_MODE", "auto").strip().lower()  # auto | pipefy | legacy
 
 st.set_page_config(page_title=APP_TITLE, layout="wide")
 inject_global_styles()
 render_product_header(APP_TITLE, APP_SUBTITLE)
 
-pages = [
+all_pages = [
     "Overview Executivo",
     "Monitoramento de SLA",
     "Backlog & Prioridades",
@@ -70,23 +71,23 @@ pages = [
     "Inteligência Operacional com Pipefy",
     "Explorador Operacional de Cards",
 ]
+base_df = load_dataset()
+legacy_available = not base_df.empty
+pipefy_only_mode = APP_DATA_MODE == "pipefy" or (APP_DATA_MODE == "auto" and not legacy_available)
+if APP_DATA_MODE == "legacy" and not legacy_available:
+    st.error(
+        "APP_DATA_MODE=legacy definido, mas a base legada não foi encontrada. "
+        "Execute `python main.py` ou altere APP_DATA_MODE para `auto`/`pipefy`."
+    )
+    st.stop()
+
+pages = ["Inteligência Operacional com Pipefy"] if pipefy_only_mode else all_pages
 selected_page = st.sidebar.radio("Navegação", pages)
 presentation_mode = st.sidebar.toggle("Modo apresentação (portfólio)", value=False)
 
 if selected_page == "Inteligência Operacional com Pipefy":
-    render_pipefy_workflow_intelligence()
-    st.markdown("---")
-    if not presentation_mode:
-        render_capabilities(PRODUCT_CAPABILITIES)
-        st.caption(f"Contato: {CONTACT_EMAIL} | LinkedIn: {CONTACT_LINKEDIN}")
-    st.stop()
-
-base_df = load_dataset()
-if base_df.empty:
-    st.warning(
-        "Base operacional legada não encontrada neste ambiente. "
-        "Abrindo automaticamente a seção de Inteligência Operacional com Pipefy."
-    )
+    if pipefy_only_mode:
+        st.caption("Modo de dados: Pipefy")
     render_pipefy_workflow_intelligence()
     st.markdown("---")
     if not presentation_mode:

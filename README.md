@@ -111,7 +111,13 @@ PIPEFY_TOKEN=your_pipefy_token_here
 PIPEFY_ORGANIZATION_ID=302461931
 PIPEFY_PIPE_ID=your_pipe_id_here
 USE_PIPEFY_MOCK=true
+APP_DATA_MODE=auto
 ```
+
+Modos de dados no app (`APP_DATA_MODE`):
+- `auto`: usa base legada quando disponível; caso contrário, entra em modo Pipefy.
+- `pipefy`: força somente a experiência Pipefy (ideal para Streamlit Cloud).
+- `legacy`: força a base legada (requer execução prévia de `python main.py`).
 
 Listar pipes da organização via API:
 ```bash
