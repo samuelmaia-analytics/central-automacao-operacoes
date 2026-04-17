@@ -1,5 +1,7 @@
 # Documentação
 
+Esta documentação sustenta o produto **Central de Automação e Operações** com foco em arquitetura, regras de automação, governança e integração Pipefy.
+
 ## Índice
 - [Arquitetura do Projeto](project_architecture.md)
 - [Fluxo de Automação](automation_flow.md)

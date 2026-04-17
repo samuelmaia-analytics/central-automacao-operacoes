@@ -23,18 +23,19 @@ from dashboard.charts import (
 )
 from dashboard.components import (
     render_badge,
-    render_bullet_summary,
     render_capabilities,
-    render_metric_cards,
+    render_health_score_card,
+    render_kpi_grid,
     render_no_data,
+    render_product_footer,
     render_product_header,
     render_section_header,
+    render_story_block,
 )
 from dashboard.filters import apply_global_filters, clear_global_filters, render_global_filters
+from dashboard.insights import build_operational_health, build_storytelling_blocks
 from dashboard.product_copy import (
     PRODUCT_CAPABILITIES,
-    executive_summary,
-    insights_consulting_style,
     sla_interpretation,
 )
 from dashboard.pages.pipefy_workflow_intelligence import render_pipefy_workflow_intelligence
@@ -62,13 +63,13 @@ inject_global_styles()
 render_product_header(APP_TITLE, APP_SUBTITLE)
 
 all_pages = [
-    "Overview Executivo",
+    "Visão Executiva",
+    "Inteligência Pipefy",
     "Monitoramento de SLA",
     "Backlog & Prioridades",
     "Gargalos do Workflow",
     "Alertas Automatizados",
     "Insights Executivos",
-    "Inteligência Operacional com Pipefy",
     "Explorador Operacional de Cards",
 ]
 base_df = load_dataset()
@@ -81,11 +82,11 @@ if APP_DATA_MODE == "legacy" and not legacy_available:
     )
     st.stop()
 
-pages = ["Inteligência Operacional com Pipefy"] if pipefy_only_mode else all_pages
+pages = ["Inteligência Pipefy"] if pipefy_only_mode else all_pages
 selected_page = st.sidebar.radio("Navegação", pages)
 presentation_mode = st.sidebar.toggle("Modo apresentação (portfólio)", value=False)
 
-if selected_page == "Inteligência Operacional com Pipefy":
+if selected_page == "Inteligência Pipefy":
     if pipefy_only_mode:
         st.caption("Modo de dados: Pipefy")
     render_pipefy_workflow_intelligence()
@@ -113,26 +114,98 @@ kpis = compute_kpi_bundle(filtered_df)
 sla_compliance = float(kpis.get("percentual_dentro_sla", 0.0))
 risk = determine_operational_risk(sla_compliance)
 critical_operational_count = compute_critical_operational_count(filtered_df)
+stories = build_storytelling_blocks(filtered_df, kpis)
+health = build_operational_health(filtered_df, kpis)
+overdue_count = int(
+    filtered_df["status_sla"].astype(str).str.contains("vencido", case=False, na=False).sum()
+) if "status_sla" in filtered_df.columns else 0
+unassigned_count = int(filtered_df["assignee"].astype(str).isin(["Unassigned"]).sum()) if "assignee" in filtered_df.columns else 0
 
-if selected_page == "Overview Executivo":
-    render_section_header("Visão executiva", "Métricas-chave e sinais de risco para decisão diária.")
-    metrics = [
-        ("Total de Tickets/Processos", f"{int(kpis['total_tickets'])}"),
-        ("Conformidade de SLA", f"{kpis['percentual_dentro_sla']:.1f}%"),
-        ("Backlog Aberto", f"{int(kpis['backlog_aberto'])}"),
-        ("Tickets Críticos", f"{critical_operational_count}"),
-        ("Tempo Médio de Resolução", format_hours(kpis["tempo_medio_resolucao_horas"])),
-        ("Potencial de Horas Economizadas", f"{kpis['potencial_horas_economizadas']:.1f}h"),
+if selected_page == "Visão Executiva":
+    render_section_header("Visão Executiva", "Central de comando para decisão operacional orientada por dados.")
+    cards = [
+        {
+            "title": "Total de cards/processos",
+            "value": f"{int(kpis['total_tickets'])}",
+            "description": "Volume monitorado no período filtrado.",
+            "status": "neutro",
+            "icon": "📌",
+        },
+        {
+            "title": "SLA dentro do prazo",
+            "value": f"{kpis['percentual_dentro_sla']:.1f}%",
+            "description": "Percentual de demandas dentro da meta de prazo.",
+            "status": "saudavel" if kpis["percentual_dentro_sla"] >= 85 else "atencao",
+            "icon": "✅",
+        },
+        {
+            "title": "Backlog aberto",
+            "value": f"{int(kpis['backlog_aberto'])}",
+            "description": "Demandas ainda em processamento no fluxo.",
+            "status": "atencao",
+            "icon": "📂",
+        },
+        {
+            "title": "Demandas críticas",
+            "value": f"{critical_operational_count}",
+            "description": "Cards com risco alto de impacto operacional.",
+            "status": "critico" if critical_operational_count > 0 else "saudavel",
+            "icon": "🚨",
+        },
+        {
+            "title": "Cards vencidos",
+            "value": f"{overdue_count}",
+            "description": "Itens com SLA vencido no recorte atual.",
+            "status": "critico" if overdue_count >= 5 else "atencao" if overdue_count else "saudavel",
+            "icon": "⏰",
+        },
+        {
+            "title": "Tempo médio de resolução",
+            "value": format_hours(kpis["tempo_medio_resolucao_horas"]),
+            "description": "Média de horas até conclusão.",
+            "status": "neutro",
+            "icon": "⏳",
+        },
+        {
+            "title": "Cards sem responsável",
+            "value": f"{unassigned_count}",
+            "description": "Demandas sem owner definido para execução.",
+            "status": "atencao" if unassigned_count else "saudavel",
+            "icon": "👤",
+        },
+        {
+            "title": "Potencial de horas economizadas",
+            "value": f"{kpis['potencial_horas_economizadas']:.1f}h",
+            "description": "Estimativa de ganho por automação operacional.",
+            "status": "neutro",
+            "icon": "⚙️",
+        },
     ]
-    render_metric_cards(metrics, cols=3)
+    render_kpi_grid(cards, cols=4)
+    render_health_score_card(
+        score=int(health["score"]),
+        classification=str(health["classification"]),
+        explanation=str(health["explanation"]),
+        drivers=list(health["drivers"]),
+        recommendation=str(health["recommendation"]),
+    )
 
     col_a, col_b = st.columns([1.3, 1.0])
     col_a.plotly_chart(trend_volume(filtered_df), width="stretch")
+    col_a.caption("Este gráfico mostra a evolução do volume de demandas por período.")
     col_b.plotly_chart(status_distribution(filtered_df), width="stretch")
+    col_b.caption("Este gráfico mostra a distribuição de status da operação atual.")
 
-    render_section_header("Resumo executivo automático")
-    render_bullet_summary(executive_summary(filtered_df, kpis, critical_count=critical_operational_count))
-    render_section_header("Índice de Saúde Operacional")
+    left_story, right_story = st.columns(2)
+    with left_story:
+        render_story_block("Resumo Executivo", stories["Resumo Executivo"])
+        render_story_block("Riscos Operacionais", stories["Riscos Operacionais"])
+    with right_story:
+        render_story_block("Insights Executivos", stories["Insights Executivos"])
+        render_story_block("Ações Recomendadas", stories["Ações Recomendadas"])
+    render_story_block("Oportunidades de Automação", stories["Oportunidades de Automação"])
+
+    render_section_header("Índice de Saúde Operacional", "Classificação composta por SLA, backlog, criticidade e atribuição.")
     render_badge(f"Nível atual: {risk.title()}", level=risk)
     if quality_summary:
         st.caption(
@@ -141,13 +214,34 @@ if selected_page == "Overview Executivo":
             f"Datas inconsistentes={quality_summary.get('linhas_data_inconsistente', 0)}"
         )
 
+elif selected_page == "Inteligência Pipefy":
+    render_pipefy_workflow_intelligence()
+
 elif selected_page == "Monitoramento de SLA":
     render_section_header("Monitoramento de SLA", "Compliance temporal, dispersão e casos críticos.")
-    render_metric_cards(
+    render_kpi_grid(
         [
-            ("Dentro do SLA", f"{kpis['percentual_dentro_sla']:.1f}%"),
-            ("Fora do SLA", f"{kpis['percentual_fora_sla']:.1f}%"),
-            ("Tempo Mediano", format_hours(kpis["tempo_mediano_resolucao_horas"])),
+            {
+                "title": "Dentro do SLA",
+                "value": f"{kpis['percentual_dentro_sla']:.1f}%",
+                "description": "Percentual em conformidade com prazo.",
+                "status": "saudavel",
+                "icon": "✅",
+            },
+            {
+                "title": "Fora do SLA",
+                "value": f"{kpis['percentual_fora_sla']:.1f}%",
+                "description": "Percentual fora da meta operacional.",
+                "status": "critico" if kpis["percentual_fora_sla"] > 20 else "atencao",
+                "icon": "⚠️",
+            },
+            {
+                "title": "Tempo Mediano",
+                "value": format_hours(kpis["tempo_mediano_resolucao_horas"]),
+                "description": "Tempo mediano de conclusão.",
+                "status": "neutro",
+                "icon": "⏳",
+            },
         ],
         cols=3,
     )
@@ -156,7 +250,9 @@ elif selected_page == "Monitoramento de SLA":
 
     col_a, col_b = st.columns(2)
     col_a.plotly_chart(sla_evolution(filtered_df), width="stretch")
+    col_a.caption("Este gráfico mostra a tendência de compliance de SLA no tempo.")
     col_b.plotly_chart(bar_count(filtered_df, "status_sla", "SLA por status"), width="stretch")
+    col_b.caption("Este gráfico mostra o balanço entre conformidade, risco e vencimento.")
 
     col_c, col_d = st.columns(2)
     col_c.plotly_chart(
@@ -181,14 +277,18 @@ elif selected_page == "Backlog & Prioridades":
 
     col_a, col_b = st.columns(2)
     col_a.plotly_chart(bar_count(backlog, "ticket_priority", "Backlog por prioridade"), width="stretch")
+    col_a.caption("Este gráfico mostra como a fila está distribuída por prioridade.")
     col_b.plotly_chart(
         bar_count(backlog, "categoria_operacional", "Backlog por categoria", orientation="h"),
         width="stretch",
     )
+    col_b.caption("Este gráfico mostra quais categorias concentram maior volume em aberto.")
 
     col_c, col_d = st.columns(2)
     col_c.plotly_chart(backlog_risk_distribution(backlog), width="stretch")
+    col_c.caption("Este gráfico mostra a distribuição de risco da fila em aberto.")
     col_d.plotly_chart(heatmap_priority_status(backlog), width="stretch")
+    col_d.caption("Este gráfico mostra a matriz de prioridade versus status no backlog.")
     if "risco_atraso" in backlog.columns and backlog["risco_atraso"].nunique(dropna=True) <= 1:
         col_c.caption("No recorte atual, o backlog está concentrado em uma única faixa de risco.")
 
@@ -238,12 +338,15 @@ elif selected_page == "Gargalos do Workflow":
         bar_count(filtered_df, "categoria_operacional", "Categorias com maior volume", orientation="h"),
         width="stretch",
     )
+    col_a.caption("Este gráfico mostra onde o fluxo concentra maior carga.")
     delayed = filtered_df[filtered_df["status_sla"].astype(str).str.contains("vencido|risco", case=False, na=False)]
     col_b.plotly_chart(
         bar_count(delayed, "categoria_operacional", "Categorias com maior atraso", orientation="h"),
         width="stretch",
     )
+    col_b.caption("Este gráfico mostra onde o atraso operacional é mais crítico.")
     st.plotly_chart(avg_resolution_by_category(filtered_df), width="stretch")
+    st.caption("Este gráfico mostra variação de tempo médio por categoria.")
 
     render_section_header("Top gargalos detectados")
     gargalos = (
@@ -265,11 +368,29 @@ elif selected_page == "Alertas Automatizados":
     sev_counts = (
         filtered_alerts["severidade"].value_counts().to_dict() if "severidade" in filtered_alerts.columns else {}
     )
-    render_metric_cards(
+    render_kpi_grid(
         [
-            ("Alertas Alta", f"{int(sev_counts.get('alta', 0))}"),
-            ("Alertas Média", f"{int(sev_counts.get('media', 0))}"),
-            ("Alertas Baixa", f"{int(sev_counts.get('baixa', 0))}"),
+            {
+                "title": "Alertas Alta",
+                "value": f"{int(sev_counts.get('alta', 0))}",
+                "description": "Itens com ação imediata recomendada.",
+                "status": "critico",
+                "icon": "🔴",
+            },
+            {
+                "title": "Alertas Média",
+                "value": f"{int(sev_counts.get('media', 0))}",
+                "description": "Itens em risco relevante de impacto.",
+                "status": "atencao",
+                "icon": "🟠",
+            },
+            {
+                "title": "Alertas Baixa",
+                "value": f"{int(sev_counts.get('baixa', 0))}",
+                "description": "Itens de monitoramento preventivo.",
+                "status": "saudavel",
+                "icon": "🟢",
+            },
         ],
         cols=3,
     )
@@ -291,7 +412,14 @@ elif selected_page == "Alertas Automatizados":
         ]
         if c in filtered_alerts.columns
     ]
-    st.dataframe(filtered_alerts[cols].head(500), width="stretch")
+    query_alert = st.text_input("Buscar alerta por tipo, status ou ação", value="", key="alert_search")
+    data_alert = filtered_alerts.copy()
+    if query_alert:
+        mask = pd.Series(False, index=data_alert.index)
+        for col in [c for c in ["tipo_alerta", "ticket_status", "acao_recomendada"] if c in data_alert.columns]:
+            mask = mask | data_alert[col].astype(str).str.contains(query_alert, case=False, na=False)
+        data_alert = data_alert[mask]
+    st.dataframe(data_alert[cols].head(500), width="stretch")
     st.download_button(
         "Exportar alertas (CSV)",
         data=filtered_alerts.to_csv(index=False).encode("utf-8"),
@@ -301,27 +429,27 @@ elif selected_page == "Alertas Automatizados":
 
 elif selected_page == "Insights Executivos":
     render_section_header("Insights Executivos", "Leitura analítica para decisão executiva e melhoria contínua.")
-    render_bullet_summary(insights_consulting_style(filtered_df, kpis))
-    render_section_header("Potencial de ganho operacional")
-    st.write(
-        f"A taxa de automação simulada está em {kpis['taxa_automacao_simulada']:.1f}% com "
-        f"potencial de economia de {kpis['potencial_horas_economizadas']:.1f}h no ciclo analisado."
-    )
-    render_section_header("Ações Recomendadas")
-    render_bullet_summary(
-        [
-            "Implantar rotina diária de gestão do backlog por severidade e risco SLA.",
-            "Automatizar abertura de ação corretiva para recorrência de cliente.",
-            "Criar meta semanal de redução do tempo mediano de resolução por categoria crítica.",
-        ]
-    )
+    render_story_block("Resumo Executivo", stories["Resumo Executivo"])
+    render_story_block("Insights Executivos", stories["Insights Executivos"])
+    render_story_block("Riscos Operacionais", stories["Riscos Operacionais"])
+    render_story_block("Ações Recomendadas", stories["Ações Recomendadas"])
+    render_story_block("Oportunidades de Automação", stories["Oportunidades de Automação"])
 
 elif selected_page == "Explorador Operacional de Cards":
     render_section_header("Explorador Operacional de Cards", "Análise detalhada com recortes customizados e exportação.")
     available_cols = filtered_df.columns.tolist()
     selected_cols = st.multiselect("Colunas para visualização", available_cols, default=available_cols[:10])
     max_rows = st.slider("Máximo de linhas exibidas", min_value=50, max_value=2000, value=500, step=50)
-    show_df = filtered_df[selected_cols].head(max_rows) if selected_cols else filtered_df.head(max_rows)
+    sort_col = st.selectbox("Ordenar por", options=available_cols, index=0 if available_cols else None)
+    ascending = st.toggle("Ordem crescente", value=False, key="explorer_order")
+    data_exp = filtered_df.sort_values(sort_col, ascending=ascending) if sort_col in filtered_df.columns else filtered_df
+    query_exp = st.text_input("Busca textual no explorador", value="", key="explorer_search")
+    if query_exp:
+        mask = pd.Series(False, index=data_exp.index)
+        for col in [c for c in data_exp.columns if data_exp[c].dtype == "object"][:12]:
+            mask = mask | data_exp[col].astype(str).str.contains(query_exp, case=False, na=False)
+        data_exp = data_exp[mask]
+    show_df = data_exp[selected_cols].head(max_rows) if selected_cols else data_exp.head(max_rows)
     st.dataframe(show_df, width="stretch")
     st.download_button(
         "Exportar dados filtrados (CSV)",
@@ -335,4 +463,5 @@ elif selected_page == "Explorador Operacional de Cards":
 st.markdown("---")
 if not presentation_mode:
     render_capabilities(PRODUCT_CAPABILITIES)
+    render_product_footer()
     st.caption(f"Contato: {CONTACT_EMAIL} | LinkedIn: {CONTACT_LINKEDIN}")
