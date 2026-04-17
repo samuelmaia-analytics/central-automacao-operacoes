@@ -57,39 +57,6 @@ Recursos de experiência:
 - exportação CSV de alertas e dados filtrados;
 - rodapé discreto com contato.
 
-## Dashboard como Produto Analítico
-A Central de Automação e Operações foi desenhada como produto SaaS de analytics operacional para monitorar workflow, reduzir risco de SLA, organizar backlog e orientar decisão executiva com ações recomendadas.
-
-Principais telas:
-- Visão Executiva
-- Inteligência Pipefy
-- Monitoramento de SLA
-- Backlog & Prioridades
-- Gargalos do Workflow
-- Alertas Automatizados
-- Insights Executivos
-- Explorador Operacional de Cards
-
-Principais KPIs:
-- volume total de cards/processos
-- conformidade de SLA
-- backlog aberto
-- demandas críticas
-- cards vencidos
-- cards sem responsável
-- tempo médio de resolução
-- potencial de horas economizadas
-
-Capacidades do produto:
-- Monitoramento de SLA
-- Integração com Pipefy
-- Detecção de Gargalos
-- Priorização Automática
-- Alertas Operacionais
-- Inteligência de Backlog
-- Recomendações Executivas
-- Exportação de Alertas
-
 ## Camada de Integração Pipefy
 O Pipefy foi integrado como **camada operacional** onde os processos acontecem (workflow, fases, backlog, responsáveis e prazos), enquanto Python/SQL/Streamlit permanecem como **camada de inteligência analítica** para SLA, risco, alertas e recomendações.
 
@@ -151,31 +118,6 @@ Modos de dados no app (`APP_DATA_MODE`):
 - `auto`: usa base legada quando disponível; caso contrário, entra em modo Pipefy.
 - `pipefy`: força somente a experiência Pipefy (ideal para Streamlit Cloud).
 - `legacy`: força a base legada (requer execução prévia de `python main.py`).
-
-## Publicação no Streamlit Cloud
-1. Suba o repositório no GitHub.
-2. Em `share.streamlit.io`, crie app com entrypoint `dashboard/app.py`.
-3. Configure secrets no app:
-```toml
-PIPEFY_TOKEN="your_pipefy_token_here"
-PIPEFY_ORGANIZATION_ID="302461931"
-PIPEFY_PIPE_ID="307112054"
-USE_PIPEFY_MOCK="false"
-PIPEFY_MASK_ASSIGNEE_NAMES="true"
-APP_DATA_MODE="pipefy"
-```
-4. Faça deploy e valide a seção **Inteligência Pipefy**.
-
-## Prints recomendados (portfólio)
-- Tela inicial com KPIs executivos
-- Índice de Saúde Operacional
-- Inteligência Operacional com Pipefy
-- Alertas Automatizados
-- Insights Executivos
-- Explorador Operacional de Cards
-
-## Relevância para vagas de Analista de Automação
-Este projeto demonstra integração de workflow real (Pipefy), engenharia analítica (Python/SQL), monitoramento operacional, priorização automática e comunicação executiva orientada por dados.
 
 Listar pipes da organização via API:
 ```bash

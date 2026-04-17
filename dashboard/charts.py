@@ -4,7 +4,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-COLORWAY = ["#1d4ed8", "#0ea5e9", "#16a34a", "#f59e0b", "#dc2626", "#7c3aed", "#334155"]
+COLORWAY = ["#0f766e", "#0ea5e9", "#f59e0b", "#ef4444", "#6366f1", "#64748b"]
 
 
 def _apply_executive_layout(fig: go.Figure) -> go.Figure:
@@ -12,27 +12,26 @@ def _apply_executive_layout(fig: go.Figure) -> go.Figure:
         template="plotly_white",
         paper_bgcolor="#ffffff",
         plot_bgcolor="#ffffff",
-        font={"color": "#0f172a", "size": 13},
-        title={"font": {"color": "#0f172a", "size": 18}},
-        legend={"font": {"color": "#334155", "size": 12}},
+        font={"color": "#111827", "size": 14},
+        title={"font": {"color": "#111827", "size": 30}},
+        legend={"font": {"color": "#111827", "size": 14}},
         legend_title_text="",
-        margin={"l": 14, "r": 14, "t": 46, "b": 10},
+        margin={"l": 20, "r": 20, "t": 60, "b": 20},
         hoverlabel={"bgcolor": "#ffffff", "font": {"color": "#111827"}},
-        height=330,
     )
     fig.update_xaxes(
         showgrid=True,
-        gridcolor="#e2e8f0",
+        gridcolor="#d1d5db",
         zeroline=False,
-        title_font={"color": "#334155", "size": 13},
-        tickfont={"color": "#475569", "size": 12},
+        title_font={"color": "#111827", "size": 18},
+        tickfont={"color": "#374151", "size": 14},
     )
     fig.update_yaxes(
         showgrid=True,
-        gridcolor="#e2e8f0",
+        gridcolor="#d1d5db",
         zeroline=False,
-        title_font={"color": "#334155", "size": 13},
-        tickfont={"color": "#475569", "size": 12},
+        title_font={"color": "#111827", "size": 18},
+        tickfont={"color": "#374151", "size": 14},
     )
     return fig
 
