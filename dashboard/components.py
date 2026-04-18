@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import json
 from collections.abc import Iterable
 
 import streamlit as st
+import streamlit.components.v1 as st_components
 
 
 def _html_escape(value: object) -> str:
@@ -141,6 +143,30 @@ def render_capabilities(capabilities: list[str]) -> None:
     st.markdown("#### Capacidades do Produto")
     joined = "".join([f"<span class='chip'>{_html_escape(item)}</span>" for item in capabilities])
     st.markdown(joined, unsafe_allow_html=True)
+
+
+def render_executive_mermaid(title: str, definition: str, height: int = 260) -> None:
+    payload = json.dumps(definition)
+    html = f"""
+<div style="border:1px solid #e5e7eb;border-radius:8px;padding:12px;background:#ffffff;">
+  <div style="font-size:14px;font-weight:600;color:#111827;margin-bottom:8px;">{_html_escape(title)}</div>
+  <pre class="mermaid" id="mermaid-exec-chart"></pre>
+</div>
+<script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+const definition = {payload};
+const target = document.querySelector("#mermaid-exec-chart");
+target.textContent = definition;
+mermaid.initialize({{
+  startOnLoad: false,
+  theme: "neutral",
+  securityLevel: "loose",
+  flowchart: {{ useMaxWidth: true }}
+}});
+await mermaid.run({{ nodes: [target] }});
+</script>
+"""
+    st_components.html(html, height=height, scrolling=False)
 
 
 def render_health_score(score: float, classification: str, factors: list[str], recommendation: str) -> None:
