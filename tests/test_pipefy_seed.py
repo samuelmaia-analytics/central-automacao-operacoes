@@ -20,4 +20,3 @@ def test_select_phase_targets_with_three_phases() -> None:
     assert targets["start"] == "1"
     assert targets["doing"] == "2"
     assert targets["done"] == "3"
-

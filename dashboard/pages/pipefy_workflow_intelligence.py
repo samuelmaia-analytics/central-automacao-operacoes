@@ -29,9 +29,11 @@ try:
         render_section_header,
         render_story_section,
     )
+
     try:
         from dashboard.components import render_executive_mermaid
     except ImportError:
+
         def render_executive_mermaid(title: str, definition: str, height: int = 260) -> None:
             st.markdown(f"#### {title}")
             st.code(definition, language="mermaid")
@@ -52,9 +54,11 @@ except Exception:
         render_section_header,
         render_story_section,
     )
+
     try:
         from components import render_executive_mermaid
     except ImportError:
+
         def render_executive_mermaid(title: str, definition: str, height: int = 260) -> None:
             st.markdown(f"#### {title}")
             st.code(definition, language="mermaid")

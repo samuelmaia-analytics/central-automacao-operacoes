@@ -34,4 +34,3 @@ def test_pipefy_mapper_handles_missing_fields() -> None:
     assert df.loc[0, "assignee"] == "Unassigned"
     assert df.loc[0, "category"] == "General"
     assert df.loc[0, "priority"] in {"Baixa", "Média", "Alta", "Crítica"}
-

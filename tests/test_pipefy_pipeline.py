@@ -13,4 +13,3 @@ def test_pipefy_pipeline_runs_in_mock_mode() -> None:
     assert "recommended_action" in df.columns
     assert set(df["source_system"].unique()) == {"pipefy"}
     assert Path(PIPEFY_OUTPUT_FILE).exists()
-

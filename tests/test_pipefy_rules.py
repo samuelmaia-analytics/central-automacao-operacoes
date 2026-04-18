@@ -56,4 +56,3 @@ def test_pipefy_rules_unassigned_and_recommendation() -> None:
     row = df[df["ticket_id"] == "3"].iloc[0]
     assert row["automation_alert"] == "Sem responsável"
     assert row["recommended_action"] == "Atribuir responsável"
-

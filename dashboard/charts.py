@@ -205,13 +205,7 @@ def pipefy_cards_by_priority(df: pd.DataFrame) -> go.Figure:
     if df.empty or "priority" not in df.columns:
         return _empty_figure(title)
     order = ["Baixa", "Média", "Alta", "Crítica"]
-    data = (
-        df["priority"]
-        .fillna("Não definida")
-        .value_counts()
-        .rename_axis("prioridade")
-        .reset_index(name="volume")
-    )
+    data = df["priority"].fillna("Não definida").value_counts().rename_axis("prioridade").reset_index(name="volume")
     fig = px.bar(
         data,
         x="prioridade",

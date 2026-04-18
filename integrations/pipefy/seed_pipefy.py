@@ -6,8 +6,10 @@ import os
 try:
     from dotenv import load_dotenv
 except Exception:  # pragma: no cover
+
     def load_dotenv() -> bool:
         return False
+
 
 from integrations.pipefy.pipefy_seed import seed_pipefy_cards
 
@@ -32,4 +34,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
