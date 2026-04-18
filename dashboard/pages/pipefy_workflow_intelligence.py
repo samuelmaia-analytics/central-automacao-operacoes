@@ -140,7 +140,8 @@ def render_pipefy_workflow_intelligence(show_page_intro: bool = False) -> None:
     if show_page_intro:
         st.markdown("## Central de Automação e Operações")
         st.caption(
-            "Monitoramento operacional integrado ao Pipefy para acompanhar cards, fases, SLA, backlog, riscos e alertas."
+            "Monitoramento operacional integrado ao Pipefy para acompanhar cards, fases, "
+            "SLA, backlog, riscos e alertas."
         )
     render_section_header("Inteligência Operacional com Pipefy")
     render_executive_mermaid(
