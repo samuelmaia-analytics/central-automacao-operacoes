@@ -24,12 +24,14 @@ try:
     )
     from dashboard.components import (
         render_data_source_status,
+        render_executive_mermaid,
         render_kpi_cards,
         render_no_data,
         render_section_header,
         render_story_section,
     )
     from dashboard.insights import executive_story_lines
+    from integrations.pipefy.pipefy_pipeline import run_pipefy_pipeline
 except Exception:
     from charts import (
         pipefy_cards_by_phase,
@@ -39,13 +41,15 @@ except Exception:
     )
     from components import (
         render_data_source_status,
+        render_executive_mermaid,
         render_kpi_cards,
         render_no_data,
         render_section_header,
         render_story_section,
     )
     from insights import executive_story_lines
-from integrations.pipefy.pipefy_pipeline import run_pipefy_pipeline
+
+    from integrations.pipefy.pipefy_pipeline import run_pipefy_pipeline
 
 REQUIRED_ALERT_COLUMNS = [
     "ticket_id",
@@ -59,6 +63,16 @@ REQUIRED_ALERT_COLUMNS = [
     "recommended_action",
     "card_url",
 ]
+
+EXECUTIVE_PIPEFY_FLOW = """
+flowchart LR
+    A[Pipefy API] --> B[Normalizacao de Dados]
+    B --> C[Calculo de SLA e Risco]
+    C --> D[Alertas Priorizados]
+    D --> E[Backlog Executivo]
+    E --> F[Acao Operacional]
+    F --> G[Indicadores de Performance]
+"""
 
 
 def _is_true(value: str | None) -> bool:
@@ -110,12 +124,17 @@ def _render_pipefy_filters(df: pd.DataFrame) -> pd.DataFrame:
     return filtered
 
 
-def render_pipefy_workflow_intelligence() -> None:
-    st.markdown("## Central de Automação e Operações")
-    st.caption(
-        "Monitoramento operacional integrado ao Pipefy para acompanhar cards, fases, SLA, backlog, riscos e alertas automatizados."
-    )
+def render_pipefy_workflow_intelligence(show_page_intro: bool = False) -> None:
+    if show_page_intro:
+        st.markdown("## Central de Automação e Operações")
+        st.caption(
+            "Monitoramento operacional integrado ao Pipefy para acompanhar cards, fases, SLA, backlog, riscos e alertas."
+        )
     render_section_header("Inteligência Operacional com Pipefy")
+    render_executive_mermaid(
+        title="Fluxo Executivo de Monitoramento",
+        definition=EXECUTIVE_PIPEFY_FLOW,
+    )
 
     token_exists = bool(os.getenv("PIPEFY_TOKEN", "").strip())
     default_mock = _is_true(os.getenv("USE_PIPEFY_MOCK", "true")) or not token_exists
@@ -138,7 +157,9 @@ def render_pipefy_workflow_intelligence() -> None:
     )
 
     if df.empty:
-        render_no_data("Sem dados Pipefy disponíveis no momento. Ative modo demonstração ou valide PIPEFY_TOKEN/PIPEFY_PIPE_ID.")
+        render_no_data(
+            "Sem dados Pipefy disponíveis no momento. Ative modo demonstração ou valide PIPEFY_TOKEN/PIPEFY_PIPE_ID."
+        )
         return
 
     for col in ["created_at", "updated_at", "due_date", "closed_at"]:
@@ -283,8 +304,13 @@ def render_pipefy_workflow_intelligence() -> None:
     alerts = filtered[present_cols].copy()
     alert_summary_cols = st.columns(4)
     alert_summary_cols[0].metric("Total de alertas", len(alerts))
-    alert_summary_cols[1].metric("Alertas críticos", int(alerts["risk_level"].astype(str).str.contains("High|Crítico", case=False, na=False).sum()))
-    alert_summary_cols[2].metric("Alertas SLA", int(alerts["sla_status"].astype(str).str.contains("SLA", case=False, na=False).sum()))
+    alert_summary_cols[1].metric(
+        "Alertas críticos",
+        int(alerts["risk_level"].astype(str).str.contains("High|Crítico", case=False, na=False).sum()),
+    )
+    alert_summary_cols[2].metric(
+        "Alertas SLA", int(alerts["sla_status"].astype(str).str.contains("SLA", case=False, na=False).sum())
+    )
     alert_summary_cols[3].metric("Sem responsável", int(unassigned_mask.sum()))
 
     st.dataframe(alerts, width="stretch")
@@ -302,4 +328,4 @@ def render_pipefy_workflow_intelligence() -> None:
 
 if __name__ == "__main__":
     st.set_page_config(page_title="Central de Automação e Operações", layout="wide")
-    render_pipefy_workflow_intelligence()
+    render_pipefy_workflow_intelligence(show_page_intro=True)

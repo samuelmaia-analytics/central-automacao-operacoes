@@ -78,6 +78,7 @@ except Exception:
     from pages.pipefy_workflow_intelligence import render_pipefy_workflow_intelligence
     from product_copy import PRODUCT_CAPABILITIES
     from styles import inject_global_styles
+
     from utils import (
         OPEN_STATUSES,
         build_alerts,
@@ -129,10 +130,10 @@ presentation_mode = st.sidebar.toggle("Modo apresentação (portfólio)", value=
 if selected_page == "Inteligência Operacional com Pipefy":
     if pipefy_only_mode:
         st.caption("Modo de dados: Pipefy")
-    render_pipefy_workflow_intelligence()
+    render_pipefy_workflow_intelligence(show_page_intro=False)
     st.markdown("---")
     if not presentation_mode:
-        render_capabilities(PRODUCT_CAPABILITIES + ["Exportação de Alertas"])
+        render_capabilities(PRODUCT_CAPABILITIES)
         render_footer()
     st.stop()
 
@@ -166,7 +167,10 @@ unassigned_count = int(
 )
 if "assignee" in filtered_df.columns:
     unassigned_count = int(
-        filtered_df["assignee"].astype(str).str.contains("unassigned|nan|none|^$", case=False, regex=True, na=False).sum()
+        filtered_df["assignee"]
+        .astype(str)
+        .str.contains("unassigned|nan|none|^$", case=False, regex=True, na=False)
+        .sum()
     )
 
 open_mask = filtered_df["ticket_status"].fillna("").astype(str).str.lower().isin(OPEN_STATUSES)
@@ -187,7 +191,9 @@ health_score = max(
 health_class = "Saudável" if health_score >= 80 else "Atenção" if health_score >= 60 else "Crítico"
 
 if selected_page == "Visão Executiva":
-    render_section_header("Visão Executiva", "Indicadores principais para acompanhamento diário de performance operacional.")
+    render_section_header(
+        "Visão Executiva", "Indicadores principais para acompanhamento diário de performance operacional."
+    )
     render_data_source_status(
         source="Base operacional tratada",
         status="Conectado",
@@ -290,8 +296,6 @@ if selected_page == "Visão Executiva":
             f"IDs duplicados={quality_summary.get('ids_duplicados', 0)} | "
             f"Datas inconsistentes={quality_summary.get('linhas_data_inconsistente', 0)}"
         )
-    render_capabilities(PRODUCT_CAPABILITIES + ["Exportação de Alertas"])
-
 elif selected_page == "Monitoramento de SLA":
     render_section_header("Monitoramento de SLA", "Compliance temporal, evolução de risco e desempenho por categoria.")
     cards = [
@@ -340,7 +344,9 @@ elif selected_page == "Monitoramento de SLA":
         st.plotly_chart(bar_count(filtered_df, "ticket_priority", "SLA por prioridade"), width="stretch")
 
 elif selected_page == "Backlog & Prioridades":
-    render_section_header("Backlog & Prioridades", "Volume em aberto, risco de atraso e distribuição da fila operacional.")
+    render_section_header(
+        "Backlog & Prioridades", "Volume em aberto, risco de atraso e distribuição da fila operacional."
+    )
     backlog = filtered_df[open_mask]
     if backlog.empty:
         render_no_data("Não há backlog aberto no recorte filtrado.")
@@ -396,7 +402,22 @@ elif selected_page == "Alertas Automatizados":
     if filtered_alerts.empty:
         render_no_data("Não há alertas para o recorte atual.")
     else:
-        sev_counts = filtered_alerts["severidade"].value_counts().to_dict() if "severidade" in filtered_alerts.columns else {}
+        sla_alerts_count = int(
+            filtered_alerts["tipo_alerta"].astype(str).str.contains("SLA", case=False, na=False).sum()
+        )
+        unassigned_alert_count = (
+            int(
+                filtered_df.get("assignee", pd.Series(index=filtered_df.index))
+                .astype(str)
+                .str.contains("Unassigned", case=False, na=False)
+                .sum()
+            )
+            if "assignee" in filtered_df.columns
+            else 0
+        )
+        sev_counts = (
+            filtered_alerts["severidade"].value_counts().to_dict() if "severidade" in filtered_alerts.columns else {}
+        )
         cards = [
             {
                 "title": "Total de alertas",
@@ -414,14 +435,14 @@ elif selected_page == "Alertas Automatizados":
             },
             {
                 "title": "Alertas de SLA",
-                "value": f"{int(filtered_alerts['tipo_alerta'].astype(str).str.contains('SLA', case=False, na=False).sum())}",
+                "value": f"{sla_alerts_count}",
                 "description": "Alertas associados a risco/vencimento de SLA.",
                 "status": "atencao",
                 "icon": "⏱️",
             },
             {
                 "title": "Sem responsável",
-                "value": f"{int(filtered_df.get('assignee', pd.Series(index=filtered_df.index)).astype(str).str.contains('Unassigned', case=False, na=False).sum()) if 'assignee' in filtered_df.columns else 0}",
+                "value": f"{unassigned_alert_count}",
                 "description": "Cards sem owner para execução.",
                 "status": "atencao",
                 "icon": "👤",
@@ -460,9 +481,15 @@ elif selected_page == "Insights Executivos":
     render_story_section("Oportunidades de Automação", stories["oportunidades"])
 
 elif selected_page == "Explorador Operacional de Cards":
-    render_section_header("Explorador Operacional de Cards", "Consulta operacional com busca, seleção de colunas e exportação.")
+    render_section_header(
+        "Explorador Operacional de Cards", "Consulta operacional com busca, seleção de colunas e exportação."
+    )
     available_cols = filtered_df.columns.tolist()
-    default_cols = [c for c in ["ticket_id", "ticket_status", "ticket_priority", "categoria_operacional", "status_sla"] if c in available_cols]
+    default_cols = [
+        c
+        for c in ["ticket_id", "ticket_status", "ticket_priority", "categoria_operacional", "status_sla"]
+        if c in available_cols
+    ]
     selected_cols = st.multiselect("Colunas", available_cols, default=default_cols or available_cols[:10])
     search_text = st.text_input("Busca textual")
     max_rows = st.slider("Limite de registros", min_value=50, max_value=2000, value=500, step=50)
@@ -485,5 +512,5 @@ elif selected_page == "Explorador Operacional de Cards":
 
 st.markdown("---")
 if not presentation_mode:
-    render_capabilities(PRODUCT_CAPABILITIES + ["Exportação de Alertas"])
+    render_capabilities(PRODUCT_CAPABILITIES)
     render_footer()
