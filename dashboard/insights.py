@@ -31,8 +31,12 @@ def executive_story_lines(df: pd.DataFrame) -> dict[str, list[str]]:
     top_phase = _top_value(df, phase_col)
     top_priority = _top_value(df, priority_col)
     top_risk = _top_value(df, risk_col, fallback="Risco não mapeado")
-    overdue = int(df[sla_col].astype(str).str.contains("vencido", case=False, na=False).sum()) if sla_col in df.columns else 0
-    at_risk = int(df[sla_col].astype(str).str.contains("risco", case=False, na=False).sum()) if sla_col in df.columns else 0
+    overdue = (
+        int(df[sla_col].astype(str).str.contains("vencido", case=False, na=False).sum()) if sla_col in df.columns else 0
+    )
+    at_risk = (
+        int(df[sla_col].astype(str).str.contains("risco", case=False, na=False).sum()) if sla_col in df.columns else 0
+    )
     unresolved = (
         int(df[status_col].astype(str).str.contains("open|aberto|pending", case=False, na=False).sum())
         if status_col in df.columns
@@ -59,7 +63,9 @@ def executive_story_lines(df: pd.DataFrame) -> dict[str, list[str]]:
     ]
     riscos = [
         f"{overdue} cards com SLA vencido exigem atuação imediata.",
-        f"{unassigned} cards sem responsável elevam risco de atraso." if unassigned else "Não há cards sem responsável no recorte atual.",
+        f"{unassigned} cards sem responsável elevam risco de atraso."
+        if unassigned
+        else "Não há cards sem responsável no recorte atual.",
         f"A concentração em {top_phase} sugere gargalo de workflow.",
     ]
     oportunidades = [

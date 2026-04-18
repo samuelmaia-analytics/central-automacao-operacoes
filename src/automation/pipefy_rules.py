@@ -69,7 +69,9 @@ def apply_pipefy_automation_rules(
     out.loc[overdue_mask, "sla_status"] = "SLA vencido"
     out.loc[risk_mask & ~overdue_mask, "sla_status"] = "SLA em risco"
 
-    out["days_open"] = ((out["closed_at"].fillna(now) - out["created_at"]).dt.total_seconds() / 86400).fillna(0).round(1)
+    out["days_open"] = (
+        ((out["closed_at"].fillna(now) - out["created_at"]).dt.total_seconds() / 86400).fillna(0).round(1)
+    )
     days_since_update = ((now - out["updated_at"]).dt.total_seconds() / 86400).fillna(0)
     stalled_mask = open_mask & (days_since_update >= stalled_days_threshold)
     unassigned_mask = out["assignee"].astype(str).str.strip().isin({"", "Unassigned", "None"})
@@ -80,9 +82,11 @@ def apply_pipefy_automation_rules(
 
     open_total = int(open_mask.sum())
     phase_counts = out.loc[open_mask, "current_phase"].value_counts()
-    bottleneck_phases = set(
-        phase_counts[(phase_counts >= 3) & ((phase_counts / open_total) >= bottleneck_ratio)].index.tolist()
-    ) if open_total else set()
+    bottleneck_phases = (
+        set(phase_counts[(phase_counts >= 3) & ((phase_counts / open_total) >= bottleneck_ratio)].index.tolist())
+        if open_total
+        else set()
+    )
     bottleneck_mask = out["current_phase"].isin(bottleneck_phases)
 
     out["risk_level"] = "Baixo"
@@ -99,4 +103,3 @@ def apply_pipefy_automation_rules(
 
     out["recommended_action"] = out.apply(_build_recommendation, axis=1)
     return out
-

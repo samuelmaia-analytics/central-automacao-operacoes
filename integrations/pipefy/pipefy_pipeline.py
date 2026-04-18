@@ -6,11 +6,14 @@ from pathlib import Path
 from typing import Any
 
 import pandas as pd
+
 try:
     from dotenv import load_dotenv
 except Exception:  # pragma: no cover - fallback for environments without python-dotenv
+
     def load_dotenv() -> bool:
         return False
+
 
 from integrations.pipefy.pipefy_client import (
     PipefyAuthenticationError,
