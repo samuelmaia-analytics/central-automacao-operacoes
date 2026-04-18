@@ -11,6 +11,30 @@ Fluxo:
 5. Dashboard consome esse dataset na seção `Inteligência Operacional com Pipefy`.
 6. `pipefy_seed.py` permite criação automática de cards no Pipefy para bootstrap do ambiente.
 
+## Diagrama da integração
+```mermaid
+sequenceDiagram
+    participant D as Dashboard
+    participant P as pipefy_pipeline.py
+    participant C as pipefy_client.py
+    participant A as Pipefy API
+    participant M as pipefy_mapper.py
+    participant R as pipefy_rules.py
+    participant F as CSV Processado
+
+    D->>P: Atualizar dados
+    P->>C: Buscar cards
+    C->>A: GraphQL query
+    A-->>C: Resposta cards
+    C-->>P: Payload bruto
+    P->>M: Normalizar schema
+    M-->>P: Dados normalizados
+    P->>R: Aplicar SLA e alertas
+    R-->>P: Dados enriquecidos
+    P->>F: Salvar pipefy_cards_processed.csv
+    F-->>D: Consumo na pagina Pipefy
+```
+
 ## Fluxo de dados
 - Entrada real: Pipefy GraphQL (`https://api.pipefy.com/graphql`).
 - Entrada mock: `data/samples/pipefy_cards_sample.json`.

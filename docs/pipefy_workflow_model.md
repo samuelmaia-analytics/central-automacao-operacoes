@@ -15,6 +15,20 @@ Este projeto modela o Pipefy como camada operacional de execução de demandas:
 - Resolvido
 - Cancelado
 
+## Diagrama de fases
+```mermaid
+flowchart LR
+    A[Nova solicitação] --> B[Triagem]
+    B --> C[Em análise]
+    C --> D[Em execução]
+    D --> E[Aguardando cliente]
+    E --> D
+    D --> F[Resolvido]
+    B --> G[Cancelado]
+    C --> G
+    D --> G
+```
+
 ## Campos principais dos cards
 - Identificação: `id`, `title`, `url`
 - Processo: `current_phase`, `labels`, `fields`

@@ -40,3 +40,19 @@ Formalizar as regras que sustentam cálculo de SLA, priorização automática, c
 - Criticidade operacional no dashboard considera tickets abertos com risco/vencimento de SLA ou prioridade crítica.
 - Regras de alerta explicitadas por tipo, severidade e ação recomendada.
 - Revisão periódica das regras com áreas de negócio.
+
+## Fluxo de decisão das regras
+```mermaid
+flowchart TD
+    A[Ticket de entrada] --> B{Status aberto?}
+    B -- Não --> C[Sem alerta crítico]
+    B -- Sim --> D{Dentro do SLA?}
+    D -- Sim --> E[Operacao normal]
+    D -- Não --> F[SLA em risco ou vencido]
+    F --> G{Prioridade critica?}
+    G -- Sim --> H[flag_demanda_critica = true]
+    G -- Não --> I[Monitorar risco de atraso]
+    H --> J[Gerar tipo_alerta e severidade]
+    I --> J
+    J --> K[Definir acao_recomendada]
+```

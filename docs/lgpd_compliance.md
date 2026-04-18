@@ -25,3 +25,15 @@ Documentar diretrizes de privacidade e aderência referencial à LGPD no context
 - Preferência por agregações para gestão.
 - Revisão periódica de campos exportáveis no Explorador Operacional de Cards.
 - Recomendações de pseudonimização, IAM e trilha de auditoria para produção.
+
+## Fluxo de proteção de dados
+```mermaid
+flowchart TD
+    A[Dados brutos] --> B[Classificacao de campos]
+    B --> C{PII?}
+    C -- Sim --> D[Minimizacao e pseudonimizacao]
+    C -- Não --> E[Uso analítico direto]
+    D --> F[Dashboard e exportacao controlados]
+    E --> F
+    F --> G[Auditoria e revisao periodica]
+```

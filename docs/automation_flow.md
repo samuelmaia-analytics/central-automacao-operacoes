@@ -33,14 +33,15 @@ Documentar a sequência operacional da solução, da ingestão ao consumo em das
 - Mensagens amigáveis no dashboard para base vazia.
 
 ## Diagrama do fluxo
-```text
-Ingestão CSV
-  -> Validação
-  -> Transformação
-  -> Regras de SLA e Prioridade
-  -> Alertas Automatizados
-  -> KPIs e Insights
-     -> DuckDB + SQL -> Dashboard Streamlit
-     -> Snapshots Versionados
-     -> Relatório Executivo
+```mermaid
+flowchart LR
+    A[Ingestão CSV] --> B[Validação]
+    B --> C[Transformação]
+    C --> D[Regras de SLA e Prioridade]
+    D --> E[Alertas Automatizados]
+    E --> F[KPIs e Insights]
+    F --> G[DuckDB e SQL]
+    G --> H[Dashboard Streamlit]
+    G --> I[Snapshots Versionados]
+    G --> J[Relatorio Executivo]
 ```

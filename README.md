@@ -1,9 +1,6 @@
 # Central de Automação e Operações
 
-[![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
-[![Streamlit](https://img.shields.io/badge/Streamlit-App-FF4B4B?logo=streamlit&logoColor=white)](https://streamlit.io/)
-[![Pipefy](https://img.shields.io/badge/Pipefy-Integration-4F46E5)](https://www.pipefy.com/)
-[![CI](https://github.com/samuelmaia-analytics/central-automacao-operacoes/actions/workflows/ci.yml/badge.svg)](https://github.com/samuelmaia-analytics/central-automacao-operacoes/actions/workflows/ci.yml)
+[![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/) [![Streamlit](https://img.shields.io/badge/Streamlit-App-FF4B4B?logo=streamlit&logoColor=white)](https://streamlit.io/) [![Pipefy](https://img.shields.io/badge/Pipefy-Integration-4F46E5)](https://www.pipefy.com/) [![CI](https://github.com/samuelmaia-analytics/central-automacao-operacoes/actions/workflows/ci.yml/badge.svg)](https://github.com/samuelmaia-analytics/central-automacao-operacoes/actions/workflows/ci.yml)
 
 Produto analítico para monitoramento de workflows, SLA, backlog, gargalos operacionais e alertas automatizados.
 
@@ -14,9 +11,13 @@ Produto analítico para monitoramento de workflows, SLA, backlog, gargalos opera
 - Regras automáticas para alertas, criticidade e recomendação de ação.
 
 ## Arquitetura (resumo)
-```text
-Dados operacionais -> Transformação e regras -> KPIs e alertas -> Dashboard executivo
-                                               \-> Pipeline Pipefy (mock/API)
+```mermaid
+flowchart LR
+    A[Dados Operacionais] --> B[Transformação e Regras]
+    B --> C[KPIs e Alertas]
+    C --> D[Dashboard Executivo]
+    B --> E[Pipeline Pipefy]
+    E --> F[Mock ou API]
 ```
 
 ## Principais módulos

@@ -29,3 +29,14 @@ Estabelecer diretrizes para qualidade, rastreabilidade, segurança e uso respons
 - KPIs calculados por SQL para auditabilidade.
 - Política de retenção recomendada para `raw`, `processed/snapshots` e `outputs/manifests`.
 - Repositório privado/proprietário com controle de distribuição.
+
+## Ciclo de governança
+```mermaid
+flowchart LR
+    A[Ingestão] --> B[Qualidade]
+    B --> C[Versionamento]
+    C --> D[Publicacao de KPIs]
+    D --> E[Monitoramento]
+    E --> F[Revisao de controles]
+    F --> A
+```

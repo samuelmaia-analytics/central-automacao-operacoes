@@ -38,3 +38,16 @@ Definir os campos principais da solução e sua aplicação operacional/analíti
 - `status_sla`: situação de SLA.
 - `prioridade_automatica`: prioridade recalculada.
 - `flag_demanda_critica`: criticidade operacional.
+
+## Linhagem dos dados
+```mermaid
+flowchart LR
+    A[customer_support_tickets.csv] --> B[Transformação]
+    B --> C[tickets_enriched.csv]
+    C --> D[DuckDB]
+    D --> E[Dashboard]
+    B --> F[Campos derivados]
+    F --> G[status_sla]
+    F --> H[prioridade_automatica]
+    F --> I[flag_demanda_critica]
+```

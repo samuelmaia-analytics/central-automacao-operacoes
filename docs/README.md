@@ -21,6 +21,19 @@ O dashboard foi projetado para operação executiva com:
 - alertas automatizados e ações recomendadas;
 - inteligência operacional integrada ao Pipefy (API real ou modo demonstração).
 
+## Mapa da Documentação
+```mermaid
+flowchart TD
+    A[Documentacao Central] --> B[Arquitetura]
+    A --> C[Fluxo de Automação]
+    A --> D[Regras de Negocio]
+    A --> E[Dicionario de Dados]
+    A --> F[Governança e LGPD]
+    A --> G[Integração Pipefy]
+    A --> H[Workflow Pipefy]
+    A --> I[Regras Pipefy]
+```
+
 ## Template padrão adotado
 Todos os documentos principais seguem a estrutura:
 - Objetivo

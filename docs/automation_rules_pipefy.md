@@ -27,6 +27,22 @@ Com base no alerta gerado:
 - fase `Aguardando cliente` -> **Aguardar retorno do cliente**
 - demais casos -> **Encerrar ou atualizar status**
 
+## Motor de regras (Mermaid)
+```mermaid
+flowchart TD
+    A[Card Pipefy] --> B{Card aberto?}
+    B -- Não --> C[Sem risco alto]
+    B -- Sim --> D{due_date expirou?}
+    D -- Sim --> E[SLA vencido]
+    D -- Não --> F{vence em até 2 dias?}
+    F -- Sim --> G[SLA em risco]
+    F -- Não --> H[Dentro do SLA]
+    E --> I[Classificar risco e alerta]
+    G --> I
+    H --> I
+    I --> J[Definir recommended_action]
+```
+
 ## Colunas geradas
 - `sla_status`
 - `risk_level`
