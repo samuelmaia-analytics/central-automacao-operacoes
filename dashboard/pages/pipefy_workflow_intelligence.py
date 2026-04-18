@@ -24,12 +24,18 @@ try:
     )
     from dashboard.components import (
         render_data_source_status,
-        render_executive_mermaid,
         render_kpi_cards,
         render_no_data,
         render_section_header,
         render_story_section,
     )
+    try:
+        from dashboard.components import render_executive_mermaid
+    except ImportError:
+        def render_executive_mermaid(title: str, definition: str, height: int = 260) -> None:
+            st.markdown(f"#### {title}")
+            st.code(definition, language="mermaid")
+
     from dashboard.insights import executive_story_lines
     from integrations.pipefy.pipefy_pipeline import run_pipefy_pipeline
 except Exception:
@@ -41,12 +47,18 @@ except Exception:
     )
     from components import (
         render_data_source_status,
-        render_executive_mermaid,
         render_kpi_cards,
         render_no_data,
         render_section_header,
         render_story_section,
     )
+    try:
+        from components import render_executive_mermaid
+    except ImportError:
+        def render_executive_mermaid(title: str, definition: str, height: int = 260) -> None:
+            st.markdown(f"#### {title}")
+            st.code(definition, language="mermaid")
+
     from insights import executive_story_lines
 
     from integrations.pipefy.pipefy_pipeline import run_pipefy_pipeline
