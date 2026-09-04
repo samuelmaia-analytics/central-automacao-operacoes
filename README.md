@@ -2,7 +2,15 @@
 
 [![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/) [![Streamlit](https://img.shields.io/badge/Streamlit-App-FF4B4B?logo=streamlit&logoColor=white)](https://streamlit.io/) [![Pipefy](https://img.shields.io/badge/Pipefy-Integration-4F46E5)](https://www.pipefy.com/) [![CI](https://github.com/samuelmaia-analytics/central-automacao-operacoes/actions/workflows/ci.yml/badge.svg)](https://github.com/samuelmaia-analytics/central-automacao-operacoes/actions/workflows/ci.yml)
 
-Produto analítico para monitoramento de workflows, SLA, backlog, gargalos operacionais e alertas automatizados.
+> Operações com múltiplos workflows podem perder visibilidade de SLA, backlog, criticidade e gargalos quando as informações ficam dispersas. Para enfrentar esse problema, desenvolvi uma central analítica com Python, SQL e Streamlit, integrada ao Pipefy via API/GraphQL e apoiada por regras automáticas de criticidade e alertas. O resultado é uma visão única para acompanhar prioridades operacionais, identificar atrasos e concentrar atenção nos casos que exigem ação.
+
+## Método CAR
+
+**Contexto:** equipes operacionais precisam acompanhar processos, vencimentos, responsáveis e níveis de serviço sem depender de informações espalhadas em diferentes telas e planilhas.
+
+**Ação:** construí uma solução com Python, SQL e Streamlit, integração Pipefy via GraphQL, motor de regras operacionais, indicadores de SLA, backlog, criticidade e saúde operacional, além de alertas e recomendações de ação.
+
+**Resultado:** a operação ganha uma visão consolidada dos workflows e consegue identificar com mais clareza processos vencidos, demandas críticas e itens sem responsável, reduzindo perda de visibilidade e apoiando a priorização antes que desvios de SLA se agravem.
 
 ## O que este projeto entrega
 - Monitoramento executivo de operação (SLA, risco, backlog e produtividade).
