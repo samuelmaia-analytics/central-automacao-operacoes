@@ -24,6 +24,14 @@ def ingest_dataset(input_path: Path, output_path: Path | None = None) -> pd.Data
     validate_required_columns(df)
     if "Ticket ID" in df.columns and df["Ticket ID"].duplicated().any():
         raise ValueError("Dataset invalido. Ha Ticket ID duplicado no arquivo bruto.")
+    if df["Ticket ID"].isna().any() or df["Ticket ID"].astype(str).str.strip().eq("").any():
+        raise ValueError("Dataset invalido. Ticket ID nulo ou vazio.")
+    for column in ("First Response Time", "Time to Resolution"):
+        values = df[column]
+        present = values.notna() & values.astype(str).str.strip().ne("")
+        parsed = pd.to_datetime(values, errors="coerce")
+        if (present & parsed.isna()).any():
+            raise ValueError(f"Dataset invalido. Timestamp nao interpretavel em {column}.")
     if output_path:
         ensure_directory(output_path.parent)
         df.to_csv(output_path, index=False)

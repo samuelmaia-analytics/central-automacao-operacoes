@@ -81,4 +81,43 @@ Este projeto demonstra capacidade de:
 - [Arquitetura do Projeto](docs/project_architecture.md)
 
 ## Licença
-Projeto privado e proprietário. Veja [LICENSE](LICENSE).
+Repositório público de portfólio, sob licença **CC BY-NC 4.0**, com atribuição e uso não comercial. Veja [LICENSE](LICENSE).
+
+
+## Qualidade e governança da publicação
+
+O pipeline principal valida os dados antes de sobrescrever bases, gerar snapshots,
+atualizar o DuckDB ou registrar uma execução bem-sucedida. IDs nulos/vazios ou
+duplicados, timestamps preenchidos inválidos e resolução anterior à primeira
+resposta impedem a publicação. A validação ocorre antes do filtro de watermark,
+para que o filtro incremental não esconda inconsistências do candidato.
+
+Tickets sem primeira resposta continuam permitidos e são contabilizados no
+resumo de qualidade, pois podem representar demandas aguardando atendimento.
+A rastreabilidade utiliza `run_id`, `snapshot_date`, `source_hash` e manifests.
+
+Este é um repositório público de portfólio. Políticas de acesso, retenção e
+privacidade documentadas são referências para evolução; não representam IAM
+corporativo ou comprovação de conformidade jurídica. As gravações em arquivos
+e banco não constituem uma transação única.
+
+### Verificar localmente
+
+```bash
+python -m pip install -r requirements.txt
+python -m ruff check .
+python -m ruff format --check .
+python -m pytest -q
+```
+
+O GitHub Actions executa lint, formatação e testes em Python 3.11 e 3.12.
+Consulte [governança](docs/data_governance.md) e
+[privacidade](docs/lgpd_compliance.md) para os limites da implementação.
+
+## Autor
+
+**Samuel de Andrade Maia — Engenheiro de Dados Pleno | Analytics Engineer**
+
+Atuo na **Avanade** desde **20/10/2026**, em Engenharia de Dados. Este é um **projeto pessoal de portfólio**; suas implementações, dados e resultados não representam entregas da Avanade ou de seus clientes.
+
+[LinkedIn](https://www.linkedin.com/in/samuelmaia-analytics/) · [Portfólio](https://samuelmaia-analytics.github.io/samuelmaia-analytics/) · [Currículo em PDF](https://samuelmaia-analytics.github.io/samuelmaia-analytics/assets/Samuel_Maia_Curriculo.pdf)
