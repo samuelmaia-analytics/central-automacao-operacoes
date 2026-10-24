@@ -81,7 +81,7 @@ Este projeto demonstra capacidade de:
 - [Arquitetura do Projeto](docs/project_architecture.md)
 
 ## Licença
-Projeto privado e proprietário. Veja [LICENSE](LICENSE).
+Repositório público de portfólio, sob licença **CC BY-NC 4.0**, com atribuição e uso não comercial. Veja [LICENSE](LICENSE).
 
 
 ## Qualidade e governança da publicação
@@ -113,3 +113,11 @@ python -m pytest -q
 O GitHub Actions executa lint, formatação e testes em Python 3.11 e 3.12.
 Consulte [governança](docs/data_governance.md) e
 [privacidade](docs/lgpd_compliance.md) para os limites da implementação.
+
+## Autor
+
+**Samuel de Andrade Maia — Engenheiro de Dados Pleno | Analytics Engineer**
+
+Atuo na **Avanade** desde **20/10/2026**, em Engenharia de Dados. Este é um **projeto pessoal de portfólio**; suas implementações, dados e resultados não representam entregas da Avanade ou de seus clientes.
+
+[LinkedIn](https://www.linkedin.com/in/samuelmaia-analytics/) · [Portfólio](https://samuelmaia-analytics.github.io/samuelmaia-analytics/) · [Currículo em PDF](https://samuelmaia-analytics.github.io/samuelmaia-analytics/assets/Samuel_Maia_Curriculo.pdf)
