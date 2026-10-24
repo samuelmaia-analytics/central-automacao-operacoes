@@ -43,3 +43,22 @@ def build_quality_summary(df: pd.DataFrame) -> QualitySummary:
 
 def save_quality_summary(summary: QualitySummary, output_path: Path) -> None:
     output_path.write_text(json.dumps(asdict(summary), ensure_ascii=True, indent=2), encoding="utf-8")
+
+
+def require_publishable_data(df: pd.DataFrame, summary: QualitySummary) -> None:
+    """Block critical integrity failures before any analytical output is written.
+
+    Missing first response is allowed for tickets still awaiting service; it is
+    reported as a quality/coverage indicator rather than silently discarded.
+    """
+    failures = []
+    if "ticket_id" not in df.columns:
+        failures.append("ticket_id ausente")
+    elif df["ticket_id"].isna().any() or df["ticket_id"].astype(str).str.strip().eq("").any():
+        failures.append("ticket_id nulo ou vazio")
+    if summary.ids_duplicados:
+        failures.append("ticket_id duplicado")
+    if summary.linhas_data_inconsistente:
+        failures.append("resolucao anterior a primeira resposta")
+    if failures:
+        raise ValueError("Publicacao bloqueada por qualidade: " + "; ".join(failures))

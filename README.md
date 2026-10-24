@@ -82,3 +82,34 @@ Este projeto demonstra capacidade de:
 
 ## Licença
 Projeto privado e proprietário. Veja [LICENSE](LICENSE).
+
+
+## Qualidade e governança da publicação
+
+O pipeline principal valida os dados antes de sobrescrever bases, gerar snapshots,
+atualizar o DuckDB ou registrar uma execução bem-sucedida. IDs nulos/vazios ou
+duplicados, timestamps preenchidos inválidos e resolução anterior à primeira
+resposta impedem a publicação. A validação ocorre antes do filtro de watermark,
+para que o filtro incremental não esconda inconsistências do candidato.
+
+Tickets sem primeira resposta continuam permitidos e são contabilizados no
+resumo de qualidade, pois podem representar demandas aguardando atendimento.
+A rastreabilidade utiliza `run_id`, `snapshot_date`, `source_hash` e manifests.
+
+Este é um repositório público de portfólio. Políticas de acesso, retenção e
+privacidade documentadas são referências para evolução; não representam IAM
+corporativo ou comprovação de conformidade jurídica. As gravações em arquivos
+e banco não constituem uma transação única.
+
+### Verificar localmente
+
+```bash
+python -m pip install -r requirements.txt
+python -m ruff check .
+python -m ruff format --check .
+python -m pytest -q
+```
+
+O GitHub Actions executa lint, formatação e testes em Python 3.11 e 3.12.
+Consulte [governança](docs/data_governance.md) e
+[privacidade](docs/lgpd_compliance.md) para os limites da implementação.

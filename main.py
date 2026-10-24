@@ -15,7 +15,7 @@ from src.config.settings import (
 from src.database.duckdb_pipeline import insert_run_audit, upsert_incremental_to_duckdb
 from src.incremental.watermark import apply_watermark_filter, get_last_watermark
 from src.ingestion.load_data import ingest_dataset
-from src.quality.data_quality import build_quality_summary, save_quality_summary
+from src.quality.data_quality import build_quality_summary, require_publishable_data, save_quality_summary
 from src.transformation.transform_data import transform_tickets
 from src.utils.helpers import ensure_directory
 from src.utils.logging_utils import configure_logging
@@ -55,6 +55,10 @@ def run_pipeline(
 
     LOGGER.info("Aplicando transformacoes e regras de negocio")
     transformed_df = transform_tickets(raw_df, reference_ts=reference_ts)
+    # Validate the complete candidate before watermark filtering or overwriting
+    # files, snapshots, reports, database tables and successful-run manifests.
+    candidate_quality = build_quality_summary(transformed_df)
+    require_publishable_data(transformed_df, candidate_quality)
     previous_watermark: pd.Timestamp | None = None
     applied_cutoff: pd.Timestamp | None = None
     if incremental_by_watermark:

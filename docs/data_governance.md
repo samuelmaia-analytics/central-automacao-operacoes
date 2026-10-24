@@ -28,7 +28,7 @@ Estabelecer diretrizes para qualidade, rastreabilidade, segurança e uso respons
 - Auditoria de qualidade (`data_quality_summary.json`).
 - KPIs calculados por SQL para auditabilidade.
 - Política de retenção recomendada para `raw`, `processed/snapshots` e `outputs/manifests`.
-- Repositório privado/proprietário com controle de distribuição.
+- Repositório público de portfólio; não implica controle de acesso em produção.
 
 ## Ciclo de governança
 ```mermaid
@@ -40,3 +40,14 @@ flowchart LR
     E --> F[Revisao de controles]
     F --> A
 ```
+
+
+## Bloqueio antes de publicação
+
+O fluxo `main.run_pipeline` valida o candidato completo antes do filtro incremental
+ou da primeira gravação de dados, alertas, snapshots, relatórios e auditorias de sucesso.
+IDs ausentes/nulos/vazios, duplicados e resolução anterior à primeira resposta
+bloqueiam a execução. A ingestão também rejeita timestamps preenchidos inválidos
+antes de sua conversão para valores ausentes. Ausência de primeira resposta é
+permitida para representar tickets aguardando atendimento e permanece no resumo.
+Esses controles não equivalem a certificação LGPD ou IAM corporativo.
