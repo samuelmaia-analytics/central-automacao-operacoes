@@ -2,11 +2,11 @@
 
 [![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/) [![Streamlit](https://img.shields.io/badge/Streamlit-App-FF4B4B?logo=streamlit&logoColor=white)](https://central-automacao-operacoes.streamlit.app/) [![Pipefy](https://img.shields.io/badge/Pipefy-Integration-4F46E5)](https://www.pipefy.com/) [![CI](https://github.com/samuelmaia-analytics/central-automacao-operacoes/actions/workflows/ci.yml/badge.svg)](https://github.com/samuelmaia-analytics/central-automacao-operacoes/actions/workflows/ci.yml)
 
-> Operações com múltiplos workflows podem perder visibilidade de SLA, backlog, criticidade e gargalos quando as informações ficam dispersas. Para enfrentar esse problema, desenvolvi uma central analítica com Python, SQL e Streamlit, integrada ao Pipefy via API/GraphQL e apoiada por regras automáticas de criticidade e alertas. O resultado é uma visão única para acompanhar prioridades operacionais, identificar atrasos e concentrar atenção nos casos que exigem ação.
+> Desenvolvi uma central com Python, SQL, DuckDB e Streamlit para consolidar dados operacionais e acompanhar SLA, backlog, criticidade e responsáveis. A integração com Pipefy utiliza API/GraphQL e dispõe de modo demonstrativo. Regras em Python classificam prioridades e geram alertas; o pipeline principal possui validações de integridade antes da publicação e registra informações de rastreabilidade.
 
 ## Resultados e capacidades
 
-a operação ganha uma visão consolidada dos workflows e consegue identificar com mais clareza processos vencidos, demandas críticas e itens sem responsável, reduzindo perda de visibilidade e apoiando a priorização antes que desvios de SLA se agravem.
+A demonstração consolida indicadores de SLA, backlog e criticidade para identificar demandas vencidas, sem responsável ou prioritárias. Esses resultados demonstram funcionalidades; não representam ganhos de produtividade medidos em uma operação real. A demonstração pode utilizar dados de exemplo; a automação apresentada utiliza regras em código e integração Pipefy.
 
 ## O que este projeto entrega
 - Monitoramento executivo de operação (SLA, risco, backlog e produtividade).
